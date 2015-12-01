@@ -23,8 +23,9 @@ public class Node {
 	// The backoff windows used in the Ethernet binary exponential backoff algorithm
 	private int backoffWindow;
 
-    // number of packets passing by the receiver, excluding packets that
-    // this node transmits.
+    // number of packets passing by the receiver
+    // increment on start of preamble, contents, jamming
+    // decrement on end of preamble, contents, jamming
     private int ongoingTransmissions;
     
     // a count of the number of packets that have been successfully sent
