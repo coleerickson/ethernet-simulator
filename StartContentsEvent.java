@@ -1,3 +1,11 @@
+/* Spawned by transmitting content state.
+
+Sent to all nodes.
+
+Triggers busy receiver state.
+Triggers jamming transmitter state if it is transmitting content.
+*/
+
 public class StartContentsEvent extends EthernetEvent {
 
     // list of paired end events to cancel if the packet that is associated
