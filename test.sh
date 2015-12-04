@@ -1,5 +1,5 @@
 javac *.java
 
 if [ $? == 0 ]; then
-	java EthernetSimulator;
+	java -ea EthernetSimulator;
 fi
