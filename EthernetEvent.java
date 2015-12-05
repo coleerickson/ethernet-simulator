@@ -1,14 +1,13 @@
 public abstract class EthernetEvent implements Comparable<EthernetEvent> {
 
-	Node source, dest;
-	double scheduledTime;
-	EthernetSimulator simulator;
+	protected Node source;
+	protected double scheduledTime;
+	protected EthernetSimulator simulator;
 
-	private boolean canceled;
+	protected boolean canceled;
 
-	public EthernetEvent(Node source, Node dest, double scheduledTime, EthernetSimulator simulator) {
+	protected EthernetEvent(EthernetSimulator simulator, Node source, double scheduledTime) {
 		this.source = source;
-		this.dest = dest;
 		this.scheduledTime = scheduledTime;
 		this.simulator = simulator;
 

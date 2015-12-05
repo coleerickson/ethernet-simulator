@@ -1,52 +1,76 @@
 public class Node {
-  enum ReceiverState {
-    BUSY,
-    WAITING_INTERPACKET,
-    IDLE;
-  }
+    enum ReceiverState {
+        BUSY,
+        WAITING_INTERPACKET,
+        IDLE;
+    }
 
-  enum TransmitterState {
-    // INACTIVE, // it might be useful to have a state in which the node is not trying to send at all
-    PREPARING_NEXT_PACKET,
-    EAGER,
-    TRANSMITTING_PREAMBLE,
-    TRANSMITTING_CONTENTS,
-    JAMMING,
-    WAITING_FOR_BACKOFF;
-  }
+    enum TransmitterState {
+        // INACTIVE, // it might be useful to have a state in which the node is not trying to send at all
+        PREPARING_NEXT_PACKET,
+        EAGER,
+        TRANSMITTING_PREAMBLE,
+        TRANSMITTING_CONTENTS,
+        JAMMING,
+        WAITING_FOR_BACKOFF;
+    }
 
+    // An identifier for this node
+    private final String name;
 
-  private final String name;
+    // The size of packets (in bytes) that this node sends
+    private int packetSize;
 
-  private int packetSize;
+    // The backoff windows used in the Ethernet binary exponential backoff algorithm
+    private int backoffWindow;
 
-  // The backoff windows used in the Ethernet binary exponential backoff algorithm
-  private int backoffWindow;
+    // number of packets passing by the receiver
+    // increment on start of preamble, contents, jamming
+    // decrement on end of preamble, contents, jamming
+    public int ongoingTransmissions;
 
-  // number of packets passing by the receiver
-  // increment on start of preamble, contents, jamming
-  // decrement on end of preamble, contents, jamming
-  private int ongoingTransmissions;
+    // a count of the number of packets that have been successfully sent
+    private double successfulPackets;
 
-  // a count of the number of packets that have been successfully sent
-  private double successfulPackets;
+    public ReceiverState receiver;
+    public TransmitterState transmitter;
 
-  public ReceiverState receiver;
-  public TransmitterState transmitter;
+    private EthernetSimulator simulator;
 
+    public Node(EthernetSimulator simulator, String name, int packetSize) {
+        this.name = name;
+        this.packetSize = packetSize;
+        this.simulator = simulator;
 
-  public Node(String name, int packetSize, EthernetSimulator simulator) {
-    this.name = name;
-    this.packetSize = packetSize;
-    backoffWindow = 0;
+        backoffWindow = 0;
 
-    receiver = ReceiverState.IDLE;
-    transmitter = TransmitterState.PREPARING_NEXT_PACKET;
+        receiver = ReceiverState.IDLE;
+        transmitter = TransmitterState.PREPARING_NEXT_PACKET;
 
-    simulator.add(new PacketReadyEvent(this, simulator));
-  }
+        // start preparing a packet to start this node up
+        simulator.add(new PacketReadyEvent(simulator, this, simulator.getTime()));
+    }
 
-  public String getName() { return name; }
-  public double getPacketSize() { return packetSize; }
-  public double getSuccessfulPackets() { return successfulPackets; }
+    // public <T extends RoutedDataEvent> void broadcastRoutedDataEvents(double sendTime, double duration) {
+    //     for (Node dest : simulator.getNodes()) {
+    //         simulator.add(new T(simulator, this, dest, sendTime, true));
+    //         simulator.add(new T(simulator, this, dest, sendTime + duration, false));
+    //     }
+    // }
+
+    public void broadcastPreambleEvents(double sendTime) {
+        // a preamble
+        double duration = PreambleEvent.BIT_TIME_DURATION * EthernetSimulator.BIT_TIME;
+
+        this.transmitter = TransmitterState.TRANSMITTING_PREAMBLE;
+
+        for (Node dest : simulator.getNodes()) {
+            simulator.add(new PreambleEvent(simulator, this, dest, sendTime, true));
+            simulator.add(new PreambleEvent(simulator, this, dest, sendTime + duration, false));
+        }
+    }
+
+    public String getName() { return name; }
+    public double getPacketSize() { return packetSize; }
+    public double getSuccessfulPackets() { return successfulPackets; }
 }
