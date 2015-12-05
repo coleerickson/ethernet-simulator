@@ -11,7 +11,6 @@ public class PreambleEvent extends RoutedDataEvent {
     public static final double BIT_TIME_DURATION = 64;
 
     public PreambleEvent(EthernetSimulator simulator, Node source, Node dest, double currentTime, boolean start) {
-        // TODO account for propagation delay in scheduled time
         super(simulator, source, dest, currentTime, start);
     }
 
@@ -21,11 +20,16 @@ public class PreambleEvent extends RoutedDataEvent {
 
         // TODO check if we need .equals
         // If this is the node that sent the event, either send contents or jam due to collision
-        if (!start && (source == dest)) {
-            if (source.receiver == Node.ReceiverState.BUSY) {
-                // jam
-            } else {
-                // send contents
+        if (source == dest) {
+            assert source.transmitter == Node.TransmitterState.TRANSMITTING_PREAMBLE;
+            if (!start) {
+                if (source.receiver == Node.ReceiverState.BUSY) {
+                    // TODO jam
+                    System.out.println(source.toString() + " should jam the network here.");
+                    System.exit(1);
+                } else {
+                    // TODO send contents
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class EthernetSimulator {
+    // TODO switch time to be measured in units of bit times
     // Bit rate in bits per microsecond, bit time in microseconds
     public static final double BIT_RATE = 10.0E6 / 1.0E-6,
                                BIT_TIME = 1.0 / BIT_RATE;
@@ -111,6 +112,6 @@ public class EthernetSimulator {
             }
         }
 
-        new EthernetSimulator(2, 1536).simulate(duration);
+        new EthernetSimulator(1, 1536 * 8).simulate(duration);
     }
 }

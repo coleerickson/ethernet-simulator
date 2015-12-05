@@ -18,7 +18,7 @@ public class Node {
     // An identifier for this node
     private final String name;
 
-    // The size of packets (in bytes) that this node sends
+    // The size of packets (in bits) that this node sends
     private int packetSize;
 
     // The backoff windows used in the Ethernet binary exponential backoff algorithm
