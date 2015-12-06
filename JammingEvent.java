@@ -24,7 +24,7 @@ public class JammingEvent extends RoutedDataEvent {
             // if this is the end of the jamming signal, then we move right into backoff unconditionally.
             if (!start) {
                 source.transmitter = Node.TransmitterState.WAITING_FOR_BACKOFF;
-                simulator.add(new BackoffEvent(simulator, source, scheduledTime));
+                simulator.add(new BackoffEvent(simulator, source, dest, scheduledTime, false));
             }
         }
     }

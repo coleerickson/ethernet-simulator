@@ -25,7 +25,7 @@ public class Node {
     private int packetSize;
 
     // The backoff windows used in the Ethernet binary exponential backoff algorithm
-    private int backoffWindow;
+    public int backoffWindow;
 
     // number of packets passing by the receiver
     // increment on start of preamble, contents, jamming
