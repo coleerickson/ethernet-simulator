@@ -4,7 +4,8 @@ public class EthernetSimulator {
     // TODO switch time to be measured in units of bit times
     // Bit rate in bits per microsecond, bit time in microseconds
     public static final double BIT_RATE = 10.0E6 / 1E6, // 3 Megabits per sec. divide by 10^6 microseconds per second to get it in units of bits per microsecond
-                               BIT_TIME = 1.0 / BIT_RATE;
+                               BIT_TIME = 1.0 / BIT_RATE,
+                               MAX_PROPAGATION_DELAY = 232 * BIT_TIME;
 
     private PriorityQueue<EthernetEvent> eventQueue;
     private List<Node> nodes;
@@ -23,7 +24,7 @@ public class EthernetSimulator {
                 if (a == b) {
                     return 0;
                 } else {
-                    return 232 * BIT_TIME;
+                    return MAX_PROPAGATION_DELAY;
                 }
             }
         };
