@@ -110,8 +110,11 @@ public class Node {
 
                 event.cancel();
 
-                ContentsEvent truncatedEvent = new ContentsEvent(simulator, this, event.dest, sendTime + simulator.getLayout().getPropagationDelay(event.source, event.dest), false);
+                // TODO factor out packet size from scheduled time
+                ContentsEvent truncatedEvent = new ContentsEvent(simulator, this, event.dest, 0, false);
+                truncatedEvent.scheduledTime = event.scheduledTime + simulator.getLayout().getPropagationDelay(event.source, event.dest);
                 truncatedEvent.fail();
+
                 simulator.add(truncatedEvent);
             }
             packetsInProgress = null;

@@ -18,7 +18,9 @@ public abstract class EthernetEvent implements Comparable<EthernetEvent> {
 
 	public abstract String toString();
 
+
 	public final int compareTo(EthernetEvent e) {
+		// TODO ensure preamble end and content begin are correctly sequenced -- see if this is causing problems. see if there is a correct non-zero delay between preamble and contents
 		return this.scheduledTime > e.scheduledTime ? 1 : -1;
 	}
 

@@ -44,12 +44,14 @@ public class BackoffEvent extends EthernetEvent {
         // backoff complete. If receiver idle, send preamble, otherwise transmitter state becomes eager.
         if(dest.receiver == Node.ReceiverState.IDLE){
           // Schedule preamble event
-          simulator.add(new PreambleEvent(simulator, source, dest, scheduledTime, true));
+          source.broadcastPreambleEvents(scheduledTime);
         } else {
           source.transmitter = Node.TransmitterState.EAGER;
         }
       }
     }
+
+    // TODO add transmitter and receiver states to debug info
 
     @Override
     public String toString() {

@@ -36,11 +36,11 @@ public class ContentsEvent extends RoutedDataEvent {
         if (source == dest) {
             return dest.getName() + " (source: " + source.getName() + ") at " + scheduledTime
                     + ": " + (start ? "Started" : "Finished")
-                    + " transmitting packet contents.";
+                    + " transmitting packet contents." + (isFailed() ? " (PACKET TRUNCATED)" : "");
         } else {
             return dest.getName() + " (source: " + source.getName() + ") at " + scheduledTime
                     + ": Received the " + (start ? "beginning" : "end")
-                    + " of a packet's contents.";
+                    + " of a packet's contents." + (isFailed() ? " (PACKET TRUNCATED)" : "");
         }
     }
 }
