@@ -18,15 +18,12 @@ public class PreambleEvent extends RoutedDataEvent {
     public void process() {
         super.process();
 
-        // TODO check if we need .equals
         // If this is the node that sent the event, either send contents or jam due to collision
         if (source == dest) {
             assert source.transmitter == Node.TransmitterState.TRANSMITTING_PREAMBLE;
             if (!start) {
                 if (source.receiver == Node.ReceiverState.BUSY) {
-                    // TODO jam
-                    System.out.println(source.getName() + " should jam the network here.");
-                    System.exit(1);
+                    source.interruptTransmission(super.scheduledTime);
                 } else {
                     source.broadcastPacketContentsEvents(super.scheduledTime);
                 }

@@ -42,11 +42,10 @@ public class BackoffEvent extends EthernetEvent {
         simulator.add(new BackoffEvent(simulator, source, dest, scheduledTime + SLOT_WAITING_TIME * waitingTimeSlots, !complete));
       } else {
         // backoff complete. If receiver idle, send preamble, otherwise transmitter state becomes eager.
-        if(dest.receiver == Node.ReceiverState.IDLE){
+        source.transmitter = Node.TransmitterState.EAGER;
+        if (dest.receiver == Node.ReceiverState.IDLE){
           // Schedule preamble event
           source.broadcastPreambleEvents(scheduledTime);
-        } else {
-          source.transmitter = Node.TransmitterState.EAGER;
         }
       }
     }

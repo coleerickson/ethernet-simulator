@@ -102,6 +102,8 @@ public class Node {
                 || this.transmitter == TransmitterState.TRANSMITTING_PREAMBLE;
         assert this.receiver == ReceiverState.BUSY; // TODO this might not be a valid assertion.
 
+        // if we start jamming while sending contents, we have to truncate the contents. if we have just finished sending the
+        // preamble, then we don't have to do anything.
         if (this.transmitter == TransmitterState.TRANSMITTING_CONTENTS) {
             assert packetsInProgress != null;
             for (ContentsEvent event : packetsInProgress) {
@@ -110,7 +112,7 @@ public class Node {
 
                 event.cancel();
 
-                // TODO factor out packet size from scheduled time
+                // TODO clean this up
                 ContentsEvent truncatedEvent = new ContentsEvent(simulator, this, event.dest, 0, false);
                 truncatedEvent.scheduledTime = event.scheduledTime + simulator.getLayout().getPropagationDelay(event.source, event.dest);
                 truncatedEvent.fail();

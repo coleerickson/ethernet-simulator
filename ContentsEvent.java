@@ -18,6 +18,8 @@ public class ContentsEvent extends RoutedDataEvent {
 
     @Override
     public void process() {
+        assert !isCanceled();
+
         super.process();
 
         // if we successfully sent the packet contents, then we are done with the packet and move back to preparing a new packet.
