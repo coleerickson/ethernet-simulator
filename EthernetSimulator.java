@@ -43,11 +43,11 @@ public class EthernetSimulator {
     }
 
     public double computeUtilization(List<Node> nodes, double time) {
-        double totalBytes = 0;
+        double totalBits = 0;
         for (Node node : nodes) {
-            totalBytes += node.getSuccessfulPackets() * node.getPacketSize();
+            totalBits += node.successfulPackets * node.getPacketSize();
         }
-        double utilization = totalBytes / time;
+        double utilization = totalBits / time;
         return utilization;
     }
 
@@ -119,6 +119,6 @@ public class EthernetSimulator {
             }
         }
 
-        new EthernetSimulator(10, 1536 * 8).simulate(duration);
+        new EthernetSimulator(2, 1536 * 8).simulate(duration);
     }
 }

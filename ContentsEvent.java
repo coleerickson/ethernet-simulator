@@ -16,6 +16,9 @@ public class ContentsEvent extends RoutedDataEvent {
         failed = false;
     }
 
+
+    // TODO restructure all events so that they are processed by methods of Node? would make more sense in terms of access modifiers
+
     @Override
     public void process() {
         assert !isCanceled();
@@ -25,6 +28,10 @@ public class ContentsEvent extends RoutedDataEvent {
         // if we successfully sent the packet contents, then we are done with the packet and move back to preparing a new packet.
         if (source == dest && !start && !isFailed()) {
             assert source.transmitter == Node.TransmitterState.TRANSMITTING_CONTENTS;
+
+            source.packetsInProgress = null;
+            ++source.successfulPackets;
+
             source.transmitter = Node.TransmitterState.PREPARING_NEXT_PACKET;
             simulator.add(new PacketReadyEvent(simulator, source, super.scheduledTime));
         }

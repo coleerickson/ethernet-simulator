@@ -33,14 +33,14 @@ public class Node {
     public int ongoingTransmissions;
 
     // a count of the number of packets that have been successfully sent
-    private double successfulPackets;
+    public double successfulPackets;
 
     public ReceiverState receiver;
     public TransmitterState transmitter;
 
     private EthernetSimulator simulator;
 
-    private List<ContentsEvent> packetsInProgress;
+    public List<ContentsEvent> packetsInProgress;
 
     public Node(EthernetSimulator simulator, String name, int packetSize) {
         this.name = name;
@@ -142,5 +142,4 @@ public class Node {
 
     public String getName() { return name; }
     public double getPacketSize() { return packetSize; }
-    public double getSuccessfulPackets() { return successfulPackets; }
 }
