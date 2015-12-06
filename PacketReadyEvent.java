@@ -21,7 +21,8 @@ public class PacketReadyEvent extends EthernetEvent {
         if (source.receiver == Node.ReceiverState.IDLE) {
             source.broadcastPreambleEvents(super.scheduledTime);
         } else {
-            // TODO on all End events, check if eager and receiver idle and then send preamble so that an EAGER transmitter will actually do something
+            // TODO on all End events, check if eager and receiver idle and then send preamble so that an EAGER transmitter
+            // will actually do something
             source.transmitter = Node.TransmitterState.EAGER;
         }
     }
