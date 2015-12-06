@@ -131,6 +131,6 @@ public class EthernetSimulator {
             }
         }
 
-        new EthernetSimulator(2, 1536 * 8).simulate(duration);
+        new EthernetSimulator(30, 1536 * 8).simulate(duration);
     }
 }

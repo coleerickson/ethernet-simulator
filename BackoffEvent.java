@@ -56,6 +56,6 @@ public class BackoffEvent extends EthernetEvent {
     public String toString() {
       return "T" + scheduledTime + ", " + source.getName() + ": back off round " +
           (complete ? source.backoffWindow : source.backoffWindow + 1) +
-          (complete ? " complete" : " started with backOffWindow " + (source.backoffWindow + 1) +".");
+          (complete ? " complete" : " started.");
     }
 }
