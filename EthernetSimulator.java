@@ -3,7 +3,7 @@ import java.util.*;
 public class EthernetSimulator {
     // TODO switch time to be measured in units of bit times
     // Bit rate in bits per microsecond, bit time in microseconds
-    public static final double BIT_RATE = 10.0E6 / 1.0E-6,
+    public static final double BIT_RATE = 10.0E6 / 1E6, // 3 Megabits per sec. divide by 10^6 microseconds per second to get it in units of bits per microsecond
                                BIT_TIME = 1.0 / BIT_RATE;
 
     private PriorityQueue<EthernetEvent> eventQueue;
@@ -17,12 +17,18 @@ public class EthernetSimulator {
         nodes = new ArrayList<>();
         random = new Random(0L);
         layout = new Layout() {
+            // simple implementation where all nodes are separated by a distance such that the bandwidth-delay product
+            // is 1 kilobyte
             public double getPropagationDelay(Node a, Node b) {
-                return 0;
+                if (a == b) {
+                    return 0;
+                } else {
+                    return 232 * BIT_TIME;
+                }
             }
         };
 
-        for (int i = 0; i < hosts; ++i) {
+        for (int i = 1; i <= hosts; ++i) {
             nodes.add(new Node(this, "Host " + i, packetSize));
         }
 
@@ -55,18 +61,19 @@ public class EthernetSimulator {
         EthernetEvent event = eventQueue.poll();
         while (event != null) {
             assert event.scheduledTime >= time;
-            System.out.println("Time difference between events = " + (event.scheduledTime - time) / BIT_TIME + " bit times.");
+            // System.out.println("Time difference between events = " + (event.scheduledTime - time) / BIT_TIME + " bit times.");
+
+            // for (Node node : nodes) { System.out.println("        " + node.getName() + ": " + node.ongoingTransmissions); }
+
             time = event.scheduledTime;
             if (time > duration) {
                 break;
             }
 
-            if (event.isCanceled()) {
-                continue;
+            if (!event.isCanceled()) {
+                System.out.println(event);
+                event.process();
             }
-
-            System.out.println(event);
-            event.process();
 
             event = eventQueue.poll();
         }
@@ -102,7 +109,7 @@ public class EthernetSimulator {
     public static void main(String[] args) {
         double duration;
         if (args.length == 0) {
-            duration = 1E6; // by default, simulate the behavior of the network over 100 microseconds
+            duration = 10E6; // by default, simulate the behavior of the network over 10 seconds
         } else {
             try {
                 duration = Double.parseDouble(args[0]);

@@ -17,17 +17,17 @@ public class PacketReadyEvent extends EthernetEvent {
     public void process() {
         assert source.transmitter == Node.TransmitterState.PREPARING_NEXT_PACKET;
 
+        source.transmitter = Node.TransmitterState.EAGER;
         // if possible, send the preamble now. otherwise, switch the node to its eager state so that it will send the packet later.
         if (source.receiver == Node.ReceiverState.IDLE) {
             source.broadcastPreambleEvents(super.scheduledTime);
-        } else {
-            // TODO on all End events, check if eager and receiver idle and then send preamble so that an EAGER transmitter will actually do something
-            source.transmitter = Node.TransmitterState.EAGER;
         }
+
+        // TODO on all End events, check if eager and receiver idle and then send preamble so that an EAGER transmitter will actually do something
     }
 
     @Override
     public String toString() {
-        return "T" + scheduledTime + ", " + source.getName() + ": Packet ready. Switching node state to eager.";
+        return source.getName() + " at " + scheduledTime + ": Packet ready. Switching node state to eager.";
     }
 }

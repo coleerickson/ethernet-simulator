@@ -25,10 +25,10 @@ public class PreambleEvent extends RoutedDataEvent {
             if (!start) {
                 if (source.receiver == Node.ReceiverState.BUSY) {
                     // TODO jam
-                    System.out.println(source.toString() + " should jam the network here.");
+                    System.out.println(source.getName() + " should jam the network here.");
                     System.exit(1);
                 } else {
-                    // TODO send contents
+                    source.broadcastPacketContentsEvents(super.scheduledTime);
                 }
             }
         }
@@ -36,6 +36,14 @@ public class PreambleEvent extends RoutedDataEvent {
 
     @Override
     public String toString() {
-        return "T" + scheduledTime + ", " + source.getName() + " -> " + dest.getName() + ": Received the " + (start ? "beginning" : "end") + " of a preamble.";
+        if (source == dest) {
+            return dest.getName() + " (source: " + source.getName() + ") at " + scheduledTime
+                    + ": " + (start ? "Started" : "Finished")
+                    + " transmitting preamble.";
+        } else {
+            return dest.getName() + " (source: " + source.getName() + ") at " + scheduledTime
+                    + ": Received the " + (start ? "beginning" : "end")
+                    + " of a preamble.";
+        }
     }
 }
