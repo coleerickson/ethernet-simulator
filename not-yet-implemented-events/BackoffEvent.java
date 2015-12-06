@@ -11,7 +11,7 @@ public class BackoffEvent extends EthernetEvent {
     private Node dest;
     private boolean complete; // boolean to save the state of backoff. not complete means start
 
-    private static final int SLOT_WAITING_TIME = 512; // waiting time for one slot, in bit time units
+    private static final int SLOT_WAITING_TIME = 512 * EthernetSimulator.BIT_TIME ; // waiting time for one slot, in microseconds
 
     public BackoffEvent(EthernetSimulator simulator, Node source, Node dest, double scheduledTime, boolean complete) {
         super(simulator, source, scheduledTime);

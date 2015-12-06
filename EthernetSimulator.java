@@ -5,6 +5,7 @@ public class EthernetSimulator {
     // Bit rate in bits per microsecond, bit time in microseconds
     public static final double BIT_RATE = 10.0E6 / 1.0E-6,
                                BIT_TIME = 1.0 / BIT_RATE;
+                               MAX_PROPAGATION_DELAY = 464 * BIT_TIME;
 
     private PriorityQueue<EthernetEvent> eventQueue;
     private List<Node> nodes;
@@ -18,7 +19,7 @@ public class EthernetSimulator {
         random = new Random(0L);
         layout = new Layout() {
             public double getPropagationDelay(Node a, Node b) {
-                return 0;
+                return MAX_PROPAGATION_DELAY
             }
         };
 
