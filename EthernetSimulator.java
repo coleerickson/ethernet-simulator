@@ -3,7 +3,11 @@ import java.util.*;
 public class EthernetSimulator {
     // TODO switch time to be measured in units of bit times
     // Bit rate in bits per microsecond, bit time in microseconds
+<<<<<<< a27568b2d726d3d435ed183366fc0e0737e90efa
     public static final double BIT_RATE = 10.0E6 / 1E6, // 3 Megabits per sec. divide by 10^6 microseconds per second to get it in units of bits per microsecond
+=======
+    public static final double BIT_RATE = 10.0E6 / 1.0E-6,
+>>>>>>> layout stuff in ethernet simulator
                                BIT_TIME = 1.0 / BIT_RATE,
                                MAX_PROPAGATION_DELAY = 232 * BIT_TIME;
 
@@ -120,6 +124,6 @@ public class EthernetSimulator {
             }
         }
 
-        new EthernetSimulator(1, 1536 * 8).simulate(duration);
+        new EthernetSimulator(2, 1536 * 8).simulate(duration);
     }
 }
