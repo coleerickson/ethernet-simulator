@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Node {
     enum ReceiverState {
         BUSY,
@@ -37,6 +40,8 @@ public class Node {
 
     private EthernetSimulator simulator;
 
+    private List<ContentsEvent> packetsInProgress;
+
     public Node(EthernetSimulator simulator, String name, int packetSize) {
         this.name = name;
         this.packetSize = packetSize;
@@ -51,6 +56,10 @@ public class Node {
         simulator.add(new PacketReadyEvent(simulator, this, simulator.getTime()));
     }
 
+    // // The three broadcastEvents methods below are all very similar and demonstrate code duplication. Java does now
+    // // allow you to invoke the constructor of the type parameter of a generic method, and alternatives like using
+    // // a factory pattern seemed less desirable than a little code duplication.
+    // // I would have liked to do something more like this:
     // public <T extends RoutedDataEvent> void broadcastRoutedDataEvents(double sendTime, double duration) {
     //     for (Node dest : simulator.getNodes()) {
     //         simulator.add(new T(simulator, this, dest, sendTime, true));
@@ -59,15 +68,71 @@ public class Node {
     // }
 
     public void broadcastPreambleEvents(double sendTime) {
-        // a preamble
-        double duration = PreambleEvent.BIT_TIME_DURATION * EthernetSimulator.BIT_TIME;
+        assert this.transmitter == TransmitterState.EAGER;
+        assert this.receiver == ReceiverState.IDLE;
 
         this.transmitter = TransmitterState.TRANSMITTING_PREAMBLE;
 
+        double duration = PreambleEvent.BIT_TIME_DURATION * EthernetSimulator.BIT_TIME;
         for (Node dest : simulator.getNodes()) {
             simulator.add(new PreambleEvent(simulator, this, dest, sendTime, true));
             simulator.add(new PreambleEvent(simulator, this, dest, sendTime + duration, false));
         }
+    }
+
+    public void broadcastPacketContentsEvents(double sendTime) {
+        assert this.transmitter == TransmitterState.TRANSMITTING_PREAMBLE;
+        assert this.receiver == ReceiverState.IDLE;
+
+        this.transmitter = TransmitterState.TRANSMITTING_CONTENTS;
+
+        double duration = this.getPacketSize() * EthernetSimulator.BIT_TIME;
+
+        this.packetsInProgress = new ArrayList<>();
+        for (Node dest : simulator.getNodes()) {
+            simulator.add(new ContentsEvent(simulator, this, dest, sendTime, true));
+            ContentsEvent endContents = new ContentsEvent(simulator, this, dest, sendTime + duration, false);
+            simulator.add(endContents);
+            packetsInProgress.add(endContents);
+        }
+    }
+
+    public void interruptTransmission(double sendTime) {
+        assert this.transmitter == TransmitterState.TRANSMITTING_CONTENTS
+                || this.transmitter == TransmitterState.TRANSMITTING_PREAMBLE;
+        assert this.receiver == ReceiverState.BUSY; // TODO this might not be a valid assertion.
+
+        if (this.transmitter == TransmitterState.TRANSMITTING_CONTENTS) {
+            assert packetsInProgress != null;
+            for (ContentsEvent event : packetsInProgress) {
+                assert sendTime < event.scheduledTime; // must make sure that the contents have not somehow already arrived
+                assert this == event.source;
+
+                event.cancel();
+
+                ContentsEvent truncatedEvent = new ContentsEvent(simulator, this, event.dest, sendTime + simulator.getLayout().getPropagationDelay(event.source, event.dest), false);
+                truncatedEvent.fail();
+                simulator.add(truncatedEvent);
+            }
+            packetsInProgress = null;
+        } else if (this.transmitter == TransmitterState.TRANSMITTING_PREAMBLE) {
+            assert packetsInProgress == null;
+        }
+
+        this.transmitter = TransmitterState.JAMMING;
+
+        double duration = JammingEvent.BIT_TIME_DURATION * EthernetSimulator.BIT_TIME;
+        for (Node dest : simulator.getNodes()) {
+            simulator.add(new JammingEvent(simulator, this, dest, sendTime, true));
+            simulator.add(new JammingEvent(simulator, this, dest, sendTime + duration, false));
+        }
+    }
+
+    public void transitionToIdle(double currentTime) {
+        assert this.ongoingTransmissions == 0;
+
+        this.receiver = Node.ReceiverState.WAITING_INTERPACKET;
+        this.simulator.add(new ReceiverIdleEvent(this.simulator, this, currentTime));
     }
 
     public String getName() { return name; }

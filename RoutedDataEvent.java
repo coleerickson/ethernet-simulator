@@ -22,26 +22,35 @@ public abstract class RoutedDataEvent extends EthernetEvent {
         if (start) {
             ++dest.ongoingTransmissions;
 
-            dest.receiver = Node.ReceiverState.BUSY;
+            // if we receive the start of data while we are idle, then switch to busy. but don't switch while we are
+            // waiting in the interpacket gap.
+            if (dest.receiver == Node.ReceiverState.IDLE) {
+                dest.receiver = Node.ReceiverState.BUSY;
+            }
 
             // If the destination node is transmitting when it receives the start of data, then that is a collision!
             // We have to check if the source node is the same as the destination node, though, because we don't want
-            // to detect this
-
-            // TODO check if we need to use .equals() for the source/dest check. I think we only ever are passing one
-            // pointer to them around, so it shouldn't be a problem. But it might be better to change it anyway
+            // to detect our own transmission as colliding with itself
             if (dest.transmitter == Node.TransmitterState.TRANSMITTING_CONTENTS && source != dest) {
-                // TODO abort transmission (cancel the associated end event of the node that is currently transmitting)
-                // and jam
+                dest.interruptTransmission(super.scheduledTime);
             }
-
         } else {
             --dest.ongoingTransmissions;
 
-            // The receiver can only ever become idle at the end of a data event, so we check for that here.
+            // The receiver can only ever become idle at the end of a contents or packetready event, so we check for that here.
             if (dest.ongoingTransmissions == 0) {
-                // TODO schedule an event for this because we need to allow interpacket gap
-                dest.receiver = Node.ReceiverState.IDLE;
+                if (dest.transmitter == Node.TransmitterState.TRANSMITTING_PREAMBLE) {
+                    // If we receive the end of a transmission and the number of ongoing transmissions is then zero, and
+                    // we are in the TRANSMITTING_PREAMBLE state, then we must have received the end of our own preamble.
+                    // After we are done transmitting our own preamble, we either jam or transmit contents. For this
+                    // reason, we do not schedule a transition to idle in this case. We do, however, become idle
+                    // immediately so that it is clear that it is OK to start sending contents immediately.
+                    dest.receiver = Node.ReceiverState.IDLE;
+                } else {
+                    // If we are not transmitting a preamble and the number of ongoing transmissions is now zero, then
+                    // we SHOULD transition to idle.
+                    dest.transitionToIdle(super.scheduledTime);
+                }
             }
         }
 
