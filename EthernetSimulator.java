@@ -4,7 +4,8 @@ public class EthernetSimulator {
     // Bit rate in bits per microsecond, bit time in microseconds
     public static final double BIT_RATE = 10.0E6 / 1.0E6,
                                BIT_TIME = 1.0 / BIT_RATE,
-                               MAX_PROPAGATION_DELAY = 232 * BIT_TIME;
+                               MAX_PROPAGATION_DELAY = 232 * BIT_TIME,
+                               COLLECT_DATA_INTERVAL = 1.0E6; // Data collection interval is 1 second by default.
 
     private PriorityQueue<EthernetEvent> eventQueue;
     private List<Node> nodes;
@@ -58,6 +59,9 @@ public class EthernetSimulator {
     public void simulate(double duration) {
         System.out.println("Simulating " + duration + " microseconds of the network. One bit time is " + BIT_TIME + " microseconds.");
 
+        double collectData = COLLECT_DATA_INTERVAL;
+        double previousUtilization =  0; // Keeps track of network utilization during the last data collection period (defaults to 1 second)
+                                         // helps with getting network utilization during current data collection period
         EthernetEvent event = eventQueue.poll();
         while (event != null) {
             assert event.scheduledTime >= time;
@@ -68,6 +72,14 @@ public class EthernetSimulator {
             time = event.scheduledTime;
             if (time > duration) {
                 break;
+            }
+
+            if(time > collectData){
+              double currentUtilization = computeUtilization(nodes, COLLECT_DATA_INTERVAL);
+              System.out.println("[****] Utilization of the network during the " + (collectData / COLLECT_DATA_INTERVAL) +
+                " second was: " + (currentUtilization - previousUtilization) );
+              previousUtilization = currentUtilization;
+              collectData += COLLECT_DATA_INTERVAL;
             }
 
             if (!event.isCanceled()) {
