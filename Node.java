@@ -20,6 +20,7 @@ public class Node {
 
     // An identifier for this node
     private final String name;
+    private final int number;
 
     // The size of packets (in bits) that this node sends
     private int packetSize;
@@ -34,6 +35,7 @@ public class Node {
 
     // a count of the number of packets that have been successfully sent
     public double successfulPackets;
+    public double preamblesSent;
 
     public ReceiverState receiver;
     public TransmitterState transmitter;
@@ -42,8 +44,9 @@ public class Node {
 
     public List<ContentsEvent> packetsInProgress;
 
-    public Node(EthernetSimulator simulator, String name, int packetSize) {
-        this.name = name;
+    public Node(EthernetSimulator simulator, int number, int packetSize) {
+        this.number = number;
+        this.name = "Host " + number;
         this.packetSize = packetSize;
         this.simulator = simulator;
 
@@ -91,7 +94,7 @@ public class Node {
         this.packetsInProgress = new ArrayList<>();
         for (Node dest : simulator.getNodes()) {
             simulator.add(new ContentsEvent(simulator, this, dest, sendTime, true));
-            ContentsEvent endContents = new ContentsEvent(simulator, this, dest, sendTime + duration, false);
+            ContentsEvent endContents = new ContentsEvent(simulator, this, dest, sendTime + duration+1, false);
             simulator.add(endContents);
             packetsInProgress.add(endContents);
         }
@@ -129,7 +132,7 @@ public class Node {
         double duration = JammingEvent.BIT_TIME_DURATION * EthernetSimulator.BIT_TIME;
         for (Node dest : simulator.getNodes()) {
             simulator.add(new JammingEvent(simulator, this, dest, sendTime, true));
-            simulator.add(new JammingEvent(simulator, this, dest, sendTime + duration, false));
+            simulator.add(new JammingEvent(simulator, this, dest, sendTime + duration-1, false));
         }
     }
 
@@ -142,4 +145,5 @@ public class Node {
 
     public String getName() { return name; }
     public double getPacketSize() { return packetSize; }
+    public int getNumber() { return number;}
 }

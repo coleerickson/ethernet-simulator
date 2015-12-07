@@ -7,6 +7,8 @@ public class EthernetSimulator {
                                MAX_PROPAGATION_DELAY = 232 * BIT_TIME,
                                COLLECT_DATA_INTERVAL = 1.0E6; // Data collection interval is 1 second by default.
 
+    public static final int PREAMBLE_SIZE = 64;
+
     private PriorityQueue<EthernetEvent> eventQueue;
     private List<Node> nodes;
     private Layout layout;
@@ -19,7 +21,8 @@ public class EthernetSimulator {
         random = new Random(0L);
         layout = new Layout() {
             // simple implementation where all nodes are separated by a distance such that the bandwidth-delay product
-            // is 1 kilobyte
+            // is 1 kilobyte.
+            // TODO: Change this. Use the topology from 3.5 in Boggs, Mogul, and Kent paper.
             public double getPropagationDelay(Node a, Node b) {
                 if (a == b) {
                     return 0;
@@ -30,7 +33,7 @@ public class EthernetSimulator {
         };
 
         for (int i = 1; i <= hosts; ++i) {
-            nodes.add(new Node(this, "Host " + i, packetSize));
+            nodes.add(new Node(this, i, packetSize));
         }
 
         time = 0;
@@ -46,7 +49,7 @@ public class EthernetSimulator {
     public double computeUtilization(List<Node> nodes, double time) {
         double totalBits = 0;
         for (Node node : nodes) {
-            totalBits += node.successfulPackets * node.getPacketSize();
+            totalBits += node.successfulPackets * node.getPacketSize() + node.preamblesSent * PREAMBLE_SIZE;
         }
         double utilization = totalBits / time;
         return utilization;
@@ -131,6 +134,6 @@ public class EthernetSimulator {
             }
         }
 
-        new EthernetSimulator(30, 1536 * 8).simulate(duration);
+        new EthernetSimulator(5, 1536 * 8).simulate(duration);
     }
 }
