@@ -27,13 +27,15 @@ public class EthernetSimulator {
                 if (a == b) {
                     return 0;
                 } else {
-                    return MAX_PROPAGATION_DELAY;
+                  // Here I make the assumption that signals travel at 2E8 m/s and that two neighboring repeaters
+                  // are sepearated by 300 meters.
+                  return 2 * DELAY_TO_REPEATER + 1.5 * Math.abs((a.getRepeater() - b.getRepeater()));
                 }
             }
         };
 
         for (int i = 1; i <= hosts; ++i) {
-            nodes.add(new Node(this, i, packetSize));
+            nodes.add(new Node(this, (i%4), i, packetSize));
         }
 
         time = 0;
@@ -134,6 +136,6 @@ public class EthernetSimulator {
             }
         }
 
-        new EthernetSimulator(5, 1536 * 8).simulate(duration);
+        new EthernetSimulator(15, 1536 * 8).simulate(duration);
     }
 }
