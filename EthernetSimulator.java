@@ -109,7 +109,7 @@ public class EthernetSimulator {
 
         //Writing data to file.
         Path file = Paths.get("utilization_data_" + packetSize + ".txt");
-        String dataPoint = nodes.size() + " " + utilization + "\n";
+        String dataPoint = utilization + "\n";
         byte[] dataPointBytes = dataPoint.getBytes();
 
         try(OutputStream out = new BufferedOutputStream(Files.newOutputStream(file, CREATE, APPEND))){
