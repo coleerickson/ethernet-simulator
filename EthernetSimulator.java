@@ -51,8 +51,37 @@ public class EthernetSimulator {
         return utilization;
     }
 
-    public double computeNodeUtilizationStandardDeviation(List<Node> nodes) {
-        return 0; // TODO implement
+    private double computeUtilizationForOneNode(Node node, double time) {
+        double totalBits = 0;
+        totalBits += node.successfulPackets * node.getPacketSize();
+        double utilization = totalBits / time;
+        return utilization;
+    }
+
+    private double SubtractSquareMean(double utilization, double mean) {
+        return Math.pow(utilization - mean, 2)
+    }
+
+    public double computeNodeUtilizationStandardDeviation(List<Node> nodes, double time) {
+        double totalBitRate = 0;
+        double numberOfHosts = nodes.size();
+        List<double> utilizations;
+        for (Node node : nodes) {
+            double utilization = computeUtilizationForOneNode(node, time);
+            totalBitRate += utilization;
+            utilizations.add(utilization)
+        }
+        double mean = totalBitRate / numberOfHosts;
+        double totalOfSquares = 0;
+        double meanOfSquares = 0;
+
+        for (double utilizations: utilization) {
+            totalOfSquares += SubtractSquareMean(utilization, mean);
+        }
+
+        meanOfSquares = Math.sqrt(totalOfSquares / numberOfHosts);
+
+        return meanOfSquares;
     }
 
     public void simulate(double duration) {
@@ -81,7 +110,7 @@ public class EthernetSimulator {
         // we will modify this to report data at shorter intervals throughout the execution
         System.out.println("The overall utilization of the network was: " + computeUtilization(nodes, time));
         System.out.println("The standard deviation of the utilization across all hosts was: "
-        + computeNodeUtilizationStandardDeviation(nodes));
+        + computeNodeUtilizationStandardDeviation(nodes, time));
 
 
         System.out.println("Done.");
