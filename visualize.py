@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-numHost = range(16)[1:]
+numHost = range(31)[1:]
 utilizations = { '64' :  [],
                  '128':  [],
                  '256':  [],
@@ -23,8 +23,12 @@ plt.xlim(0,30)
 plt.ylim(0,10)
 plt.xlabel("Number of hosts")
 plt.ylabel("utilization")
+
+#for key in utilizations:
+#    print key, utilizations[key], len(utilizations[key])
+
 for packet_size in utilizations:
     plt.plot(numHost, utilizations[packet_size], label=packet_size)
-    
-plt.legend()
+
+#plt.legend()
 plt.show()

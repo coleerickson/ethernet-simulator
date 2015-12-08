@@ -1,4 +1,4 @@
-rm utilization_data.txt
+rm *.txt
 javac *.java
 
 if [ $? == 0 ]; then
@@ -10,3 +10,5 @@ if [ $? == 0 ]; then
 		done
 	done
 fi
+
+python visualize.py

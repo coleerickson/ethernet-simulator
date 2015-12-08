@@ -32,9 +32,10 @@ public class EthernetSimulator {
                 if (a == b) {
                     return 0;
                 } else {
+                  double twoRepeaterDelay = 1E6 * 250 / 2E8;
                   // Here I make the assumption that signals travel at 2E8 m/s and that two neighboring repeaters
                   // are sepearated by 300 meters.
-                  return 2 * DELAY_TO_REPEATER + 1.5 * Math.abs((a.getRepeater() - b.getRepeater()));
+                  return 2 * DELAY_TO_REPEATER + twoRepeaterDelay * Math.abs((a.getRepeater() - b.getRepeater()));
                 }
             }
         };
@@ -87,8 +88,8 @@ public class EthernetSimulator {
             // This is to collect data at shorter intervals. Right now the interval is 1 second, it's default value.
             if(time > collectData){
               double currentUtilization = computeUtilization(nodes, COLLECT_DATA_INTERVAL);
-              System.out.println("[****] Utilization of the network during the " + (collectData / COLLECT_DATA_INTERVAL) +
-                " second was: " + (currentUtilization - previousUtilization) );
+              //System.out.println("[****] Utilization of the network during the " + (collectData / COLLECT_DATA_INTERVAL) +
+                //" second was: " + (currentUtilization - previousUtilization) );
               previousUtilization = currentUtilization;
               collectData += COLLECT_DATA_INTERVAL;
             }
