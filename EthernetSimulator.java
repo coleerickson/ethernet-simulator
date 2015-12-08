@@ -62,30 +62,31 @@ public class EthernetSimulator {
 
     private double computeUtilizationForOneNode(Node node, double time) {
         double totalBits = 0;
-        totalBits += node.successfulPackets * node.getPacketSize();
+        totalBits = node.successfulPackets * node.getPacketSize() + node.preamblesSent * PREAMBLE_SIZE;
         double utilization = totalBits / time;
         return utilization;
     }
 
-    private double SubtractSquareMean(double utilization, double mean) {
-        return Math.pow(utilization - mean, 2)
+    private double subtractSquareMean(double utilization, double mean) {
+        return Math.pow(utilization - mean, 2);
     }
 
     public double computeNodeUtilizationStandardDeviation(List<Node> nodes, double time) {
+//        return -1;
         double totalBitRate = 0;
         double numberOfHosts = nodes.size();
-        List<double> utilizations;
+        List<double> utilizations = new List<double>();
         for (Node node : nodes) {
             double utilization = computeUtilizationForOneNode(node, time);
             totalBitRate += utilization;
-            utilizations.add(utilization)
+            utilizations.add(utilization);
         }
         double mean = totalBitRate / numberOfHosts;
         double totalOfSquares = 0;
         double meanOfSquares = 0;
 
-        for (double utilizations: utilization) {
-            totalOfSquares += SubtractSquareMean(utilization, mean);
+        for (double utilizations : utilization) {
+            totalOfSquares += subtractSquareMean(utilization, mean);
         }
 
         meanOfSquares = Math.sqrt(totalOfSquares / numberOfHosts);
@@ -129,12 +130,12 @@ public class EthernetSimulator {
         }
 
         double utilization = computeUtilization(nodes, time);
-        double standardDeviation = computeNodeUtilizationStandardDeviation(nodes);
+        double standardDeviation = computeNodeUtilizationStandardDeviation(nodes, time);
 
         // we will modify this to report data at shorter intervals throughout the execution
         System.out.println("The overall utilization of the network was: " + utilization);
         System.out.println("The standard deviation of the utilization across all hosts was: "
-        + computeNodeUtilizationStandardDeviation(nodes, time));
+        + standardDeviation);
 
         //Writing data to file.
         Path file = Paths.get("utilization_data_" + packetSize + ".txt");
