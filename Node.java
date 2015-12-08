@@ -20,6 +20,8 @@ public class Node {
 
     // An identifier for this node
     private final String name;
+    private final int number;
+    private final int repeater;
 
     // The size of packets (in bits) that this node sends
     private int packetSize;
@@ -34,6 +36,7 @@ public class Node {
 
     // a count of the number of packets that have been successfully sent
     public double successfulPackets;
+    public double preamblesSent;
 
     public ReceiverState receiver;
     public TransmitterState transmitter;
@@ -42,10 +45,12 @@ public class Node {
 
     public List<ContentsEvent> packetsInProgress;
 
-    public Node(EthernetSimulator simulator, String name, int packetSize) {
-        this.name = name;
+    public Node(EthernetSimulator simulator,int repeater, int number, int packetSize) {
+        this.number = number;
+        this.name = "Host " + number;
         this.packetSize = packetSize;
         this.simulator = simulator;
+        this.repeater = repeater;
 
         backoffWindow = 0;
 
@@ -142,4 +147,6 @@ public class Node {
 
     public String getName() { return name; }
     public double getPacketSize() { return packetSize; }
+    public int getNumber() { return number;}
+    public int getRepeater() {return repeater;}
 }
