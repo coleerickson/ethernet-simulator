@@ -1,10 +1,16 @@
 import java.util.*;
+import java.nio.file.*;
+import static java.nio.file.StandardOpenOption.*;
+import java.io.*;
 
 public class EthernetSimulator {
     // Bit rate in bits per microsecond, bit time in microseconds
     public static final double BIT_RATE = 10.0E6 / 1.0E6,
                                BIT_TIME = 1.0 / BIT_RATE,
-                               MAX_PROPAGATION_DELAY = 232 * BIT_TIME;
+                               MAX_PROPAGATION_DELAY = 232 * BIT_TIME,
+                               COLLECT_DATA_INTERVAL = 1.0E6; // Data collection interval is 1 second by default.
+
+    public static final int PREAMBLE_SIZE = 64;
 
     private PriorityQueue<EthernetEvent> eventQueue;
     private List<Node> nodes;
@@ -18,18 +24,21 @@ public class EthernetSimulator {
         random = new Random(0L);
         layout = new Layout() {
             // simple implementation where all nodes are separated by a distance such that the bandwidth-delay product
-            // is 1 kilobyte
+            // is 1 kilobyte.
+            // TODO: Change this. Use the topology from 3.5 in Boggs, Mogul, and Kent paper.
             public double getPropagationDelay(Node a, Node b) {
                 if (a == b) {
                     return 0;
                 } else {
-                    return MAX_PROPAGATION_DELAY;
+                  // Here I make the assumption that signals travel at 2E8 m/s and that two neighboring repeaters
+                  // are sepearated by 300 meters.
+                  return 2 * DELAY_TO_REPEATER + 1.5 * Math.abs((a.getRepeater() - b.getRepeater()));
                 }
             }
         };
 
         for (int i = 1; i <= hosts; ++i) {
-            nodes.add(new Node(this, "Host " + i, packetSize));
+            nodes.add(new Node(this, (i%4), i, packetSize));
         }
 
         time = 0;
@@ -45,7 +54,7 @@ public class EthernetSimulator {
     public double computeUtilization(List<Node> nodes, double time) {
         double totalBits = 0;
         for (Node node : nodes) {
-            totalBits += node.successfulPackets * node.getPacketSize();
+            totalBits += node.successfulPackets * node.getPacketSize() + node.preamblesSent * PREAMBLE_SIZE;
         }
         double utilization = totalBits / time;
         return utilization;
@@ -87,6 +96,9 @@ public class EthernetSimulator {
     public void simulate(double duration) {
         System.out.println("Simulating " + duration + " microseconds of the network. One bit time is " + BIT_TIME + " microseconds.");
 
+        double collectData = COLLECT_DATA_INTERVAL;
+        double previousUtilization =  0; // Keeps track of network utilization during the last data collection period (defaults to 1 second)
+                                         // helps with getting network utilization during current data collection period
         EthernetEvent event = eventQueue.poll();
         while (event != null) {
             assert event.scheduledTime >= time;
@@ -99,6 +111,15 @@ public class EthernetSimulator {
                 break;
             }
 
+            // This is to collect data at shorter intervals. Right now the interval is 1 second, it's default value.
+            if(time > collectData){
+              double currentUtilization = computeUtilization(nodes, COLLECT_DATA_INTERVAL);
+              System.out.println("[****] Utilization of the network during the " + (collectData / COLLECT_DATA_INTERVAL) +
+                " second was: " + (currentUtilization - previousUtilization) );
+              previousUtilization = currentUtilization;
+              collectData += COLLECT_DATA_INTERVAL;
+            }
+
             if (!event.isCanceled()) {
                 System.out.println(event);
                 event.process();
@@ -107,11 +128,24 @@ public class EthernetSimulator {
             event = eventQueue.poll();
         }
 
+        double utilization = computeUtilization(nodes, time);
+        double standardDeviation = computeNodeUtilizationStandardDeviation(nodes);
+
         // we will modify this to report data at shorter intervals throughout the execution
-        System.out.println("The overall utilization of the network was: " + computeUtilization(nodes, time));
+        System.out.println("The overall utilization of the network was: " + utilization);
         System.out.println("The standard deviation of the utilization across all hosts was: "
         + computeNodeUtilizationStandardDeviation(nodes, time));
 
+        //Writing data to file.
+        Path file = Paths.get("utilization_data_" + packetSize + ".txt");
+        String dataPoint = nodes.size() + " " + utilization + "\n";
+        byte[] dataPointBytes = dataPoint.getBytes();
+
+        try(OutputStream out = new BufferedOutputStream(Files.newOutputStream(file, CREATE, APPEND))){
+          out.write(dataPointBytes,0,dataPointBytes.length);
+        } catch (IOException x){
+          System.err.println(x);
+        }
 
         System.out.println("Done.");
     }
@@ -136,18 +170,22 @@ public class EthernetSimulator {
     * Takes one argument: the number of microseconds that should be simulated.
     */
     public static void main(String[] args) {
-        double duration;
-        if (args.length == 0) {
-            duration = 10E6; // by default, simulate the behavior of the network over 10 seconds
+        double duration = 10E6; //Defaults to 10 seconds
+        int packetSize = 1536; //Defaults to 1536 bytes
+        int numHosts = 5; //Defaults to 5 hosts
+
+        if(args.length < 3 ){
+          System.err.println("ERROR: Missing Args.\n");
         } else {
-            try {
-                duration = Double.parseDouble(args[0]);
-            } catch (NumberFormatException e) {
-                System.err.println("The first argument should be a double.");
-                throw e;
-            }
+          try {
+            packetSize = Integer.parseInt(args[0]);
+            numHosts = Integer.parseInt(args[1]);
+            duration = Double.parseDouble(args[2]);
+          } catch(NumberFormatException x){
+            System.err.println(x);
+          }
         }
 
-        new EthernetSimulator(2, 1536 * 8).simulate(duration);
+        new EthernetSimulator(numHosts, packetSize * 8).simulate(duration);
     }
 }

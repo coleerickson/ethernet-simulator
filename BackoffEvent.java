@@ -11,7 +11,7 @@ public class BackoffEvent extends EthernetEvent {
     private Node dest;
     private boolean complete; // boolean to save the state of backoff. not complete means start
 
-    private static final double SLOT_WAITING_TIME = 512 * EthernetSimulator.BIT_TIME ; // waiting time for one slot, in microseconds
+    private static final double SLOT_WAITING_TIME = 51.2  ; // waiting time for one slot, in microseconds
 
     public BackoffEvent(EthernetSimulator simulator, Node source, Node dest, double scheduledTime, boolean complete) {
         super(simulator, source, scheduledTime);
@@ -39,6 +39,10 @@ public class BackoffEvent extends EthernetEvent {
         }
 
         int waitingTimeSlots = simulator.getRandom().nextInt(1 << backoffWindow);
+
+        System.out.println("[***] Back off round " + source.backoffWindow + " : Back off window is " + backoffWindow +
+                           " and going to wait " + waitingTimeSlots + " slots.");
+
         simulator.add(new BackoffEvent(simulator, source, dest, scheduledTime + SLOT_WAITING_TIME * waitingTimeSlots, !complete));
       } else {
         // backoff complete. If receiver idle, send preamble, otherwise transmitter state becomes eager.
@@ -56,6 +60,6 @@ public class BackoffEvent extends EthernetEvent {
     public String toString() {
       return "T" + scheduledTime + ", " + source.getName() + ": back off round " +
           (complete ? source.backoffWindow : source.backoffWindow + 1) +
-          (complete ? " complete" : " started with backOffWindow " + (source.backoffWindow + 1) +".");
+          (complete ? " complete" : " started.");
     }
 }

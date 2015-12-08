@@ -22,11 +22,15 @@ public class PreambleEvent extends RoutedDataEvent {
         if (source == dest) {
             assert source.transmitter == Node.TransmitterState.TRANSMITTING_PREAMBLE;
             if (!start) {
+
+                ++source.preamblesSent;
+
                 if (source.receiver == Node.ReceiverState.BUSY) {
                     source.interruptTransmission(super.scheduledTime);
                 } else {
                     source.broadcastPacketContentsEvents(super.scheduledTime);
                 }
+
             }
         }
     }
