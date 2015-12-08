@@ -82,6 +82,7 @@ public class EthernetSimulator {
                 break;
             }
 
+            // This is to collect data at shorter intervals. Right now the interval is 1 second, it's default value.
             if(time > collectData){
               double currentUtilization = computeUtilization(nodes, COLLECT_DATA_INTERVAL);
               System.out.println("[****] Utilization of the network during the " + (collectData / COLLECT_DATA_INTERVAL) +
