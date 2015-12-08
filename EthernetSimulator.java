@@ -1,4 +1,7 @@
 import java.util.*;
+import java.nio.file.*;
+import static java.nio.file.StandardOpenOption.*;
+import java.io.*;
 
 public class EthernetSimulator {
     // Bit rate in bits per microsecond, bit time in microseconds
@@ -95,11 +98,24 @@ public class EthernetSimulator {
             event = eventQueue.poll();
         }
 
-        // we will modify this to report data at shorter intervals throughout the execution
-        System.out.println("The overall utilization of the network was: " + computeUtilization(nodes, time));
-        System.out.println("The standard deviation of the utilization across all hosts was: "
-        + computeNodeUtilizationStandardDeviation(nodes));
+        double utilization = computeUtilization(nodes, time);
+        double standardDeviation = computeNodeUtilizationStandardDeviation(nodes);
 
+        // we will modify this to report data at shorter intervals throughout the execution
+        System.out.println("The overall utilization of the network was: " + utilization);
+        System.out.println("The standard deviation of the utilization across all hosts was: "
+        + standardDeviation);
+
+        //Writing data to file.
+        Path file = Paths.get("utilization_data.txt");
+        String dataPoint = nodes.size() + " " + utilization + "\n";
+        byte[] dataPointBytes = dataPoint.getBytes();
+
+        try(OutputStream out = new BufferedOutputStream(Files.newOutputStream(file, CREATE, APPEND))){
+          out.write(dataPointBytes,0,dataPointBytes.length);
+        } catch (IOException x){
+          System.err.println(x);
+        }
 
         System.out.println("Done.");
     }
@@ -124,18 +140,22 @@ public class EthernetSimulator {
     * Takes one argument: the number of microseconds that should be simulated.
     */
     public static void main(String[] args) {
-        double duration;
-        if (args.length == 0) {
-            duration = 10E6; // by default, simulate the behavior of the network over 10 seconds
+        double duration = 10E6; //Defaults to 10 seconds
+        int packetSize = 1536; //Defaults to 1536 bytes
+        int numHosts = 5; //Defaults to 5 hosts
+
+        if(args.length < 3 ){
+          System.err.println("ERROR: Missing Args.\n");
         } else {
-            try {
-                duration = Double.parseDouble(args[0]);
-            } catch (NumberFormatException e) {
-                System.err.println("The first argument should be a double.");
-                throw e;
-            }
+          try {
+            packetSize = Integer.parseInt(args[0]);
+            numHosts = Integer.parseInt(args[1]);
+            duration = Double.parseDouble(args[2]);
+          } catch(NumberFormatException x){
+            System.err.println(x);
+          }
         }
 
-        new EthernetSimulator(15, 1536 * 8).simulate(duration);
+        new EthernetSimulator(numHosts, packetSize * 8).simulate(duration);
     }
 }

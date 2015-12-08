@@ -49,7 +49,7 @@ public abstract class RoutedDataEvent extends EthernetEvent {
                 } else {
                     // If we are not transmitting a preamble and the number of ongoing transmissions is now zero, then
                     // we SHOULD transition to idle.
-                    if(dest.receiver == Node.ReceiverState.BUSY){
+                    if (dest.receiver == Node.ReceiverState.BUSY){
                       dest.transitionToIdle(super.scheduledTime);
                     }
                 }
