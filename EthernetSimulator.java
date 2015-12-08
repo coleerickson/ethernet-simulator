@@ -17,11 +17,13 @@ public class EthernetSimulator {
     private Layout layout;
     private Random random;
     private double time;
+    private int packetSize;
 
     public EthernetSimulator(int hosts, int packetSize) {
         eventQueue = new PriorityQueue<>();
         nodes = new ArrayList<>();
         random = new Random(0L);
+        this.packetSize = packetSize;
         layout = new Layout() {
             // simple implementation where all nodes are separated by a distance such that the bandwidth-delay product
             // is 1 kilobyte.
