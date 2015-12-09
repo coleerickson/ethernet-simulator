@@ -21,6 +21,7 @@ def plot_data(data):
 		plt.plot(keys, values, label=packet_size, c=next(color))
 
 	plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+	plt.savefig("plot.png")
 	plt.show()
 	
 def plot_utilization():
@@ -29,12 +30,12 @@ def plot_utilization():
 	plt.xlabel("Number of hosts")
 	plt.ylabel("Utilization")
 	plot_data(parse("utilization_data.txt"))
+	plt.savefig("util.png")
 
 	
 def plot_sd():
 	plt.xlim(0,30)
 	plt.xlabel("Number of hosts")
-	plt.ylabel("Standard deviation")
 	plot_data(parse("standard_deviation_data.txt"))
 
 from sys import argv
