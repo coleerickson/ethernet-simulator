@@ -2,6 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
+    // The amount of packet overhead in bits. We use 20 bytes of overhead instead of 24 because we do not include a CRC in our simulation.
+    public static final int PACKET_OVERHEAD_BITS = 20 * 8;
+
     enum ReceiverState {
         BUSY,
         WAITING_INTERPACKET,
@@ -147,6 +150,9 @@ public class Node {
 
     public String getName() { return name; }
     public double getPacketSize() { return packetSize; }
+    public double getBitsSent() {
+        return this.successfulPackets * (getPacketSize() + PACKET_OVERHEAD_BITS);
+    }
     public int getNumber() { return number;}
-    public int getRepeater() {return repeater;}
+    public int getRepeater() {return repeater; }
 }

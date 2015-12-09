@@ -10,9 +10,6 @@ public class EthernetSimulator {
                                MAX_PROPAGATION_DELAY = 232 * BIT_TIME,
                                COLLECT_DATA_INTERVAL = 1.0E6; // Data collection interval is 1 second by default.
 
-    // The amount of packet overhead in bits. We use 20 bytes of overhead instead of 24 because we do not include a CRC in our simulation.
-    public static final int PACKET_OVERHEAD_BITS = 20 * 8;
-
     private PriorityQueue<EthernetEvent> eventQueue;
     private List<Node> nodes;
     private Layout layout;
@@ -54,17 +51,28 @@ public class EthernetSimulator {
         eventQueue.add(e);
     }
 
-    public double computeUtilization(List<Node> nodes, double time) {
+    public double computeUtilization(List<Node> nodes) {
         double totalBits = 0;
         for (Node node : nodes) {
-            totalBits += node.successfulPackets * (node.getPacketSize() + PACKET_OVERHEAD_BITS);
+            totalBits += node.getBitsSent();
         }
         double utilization = totalBits / time;
         return utilization;
     }
 
-    public double computeNodeUtilizationStandardDeviation(List<Node> nodes) {
-        return 0; // TODO implement
+    public double computeStandardDeviationUtilization(List<Node> nodes) {
+        double meanUtilization = computeUtilization(nodes) / nodes.size();
+
+        double squaredDeviations = 0;
+        for (Node node : nodes) {
+            double observationUtilization = node.getBitsSent() / time;
+            double deviation = observationUtilization - meanUtilization;
+            double squaredDeviation = deviation * deviation;
+            squaredDeviations += squaredDeviation;
+        }
+        double variance = squaredDeviations / (double)nodes.size();
+        double standardDeviation = Math.sqrt(variance);
+        return standardDeviation;
     }
 
     public void simulate(double duration) {
@@ -86,13 +94,13 @@ public class EthernetSimulator {
             }
 
             // This is to collect data at shorter intervals. Right now the interval is 1 second, it's default value.
-            if(time > collectData){
-              double currentUtilization = computeUtilization(nodes, COLLECT_DATA_INTERVAL);
-              System.out.println("[****] Utilization of the network during the " + (collectData / COLLECT_DATA_INTERVAL) +
-                " second was: " + (currentUtilization - previousUtilization) );
-              previousUtilization = currentUtilization;
-              collectData += COLLECT_DATA_INTERVAL;
-            }
+//            if(time > collectData){
+//              double currentUtilization = computeUtilization(nodes, COLLECT_DATA_INTERVAL);
+//              System.out.println("[****] Utilization of the network during the " + (collectData / COLLECT_DATA_INTERVAL) +
+//                " second was: " + (currentUtilization - previousUtilization) );
+//              previousUtilization = currentUtilization;
+//              collectData += COLLECT_DATA_INTERVAL;
+//            }
 
             if (!event.isCanceled()) {
                 System.out.println(event);
@@ -102,8 +110,8 @@ public class EthernetSimulator {
             event = eventQueue.poll();
         }
 
-        double utilization = computeUtilization(nodes, time);
-        double standardDeviation = computeNodeUtilizationStandardDeviation(nodes);
+        double utilization = computeUtilization(nodes);
+        double standardDeviation = computeStandardDeviationUtilization(nodes);
 
         // we will modify this to report data at shorter intervals throughout the execution
         System.out.println("The overall utilization of the network was: " + utilization);
@@ -144,7 +152,7 @@ public class EthernetSimulator {
     * Takes one argument: the number of microseconds that should be simulated.
     */
     public static void main(String[] args) {
-        double duration = 10E6; //Defaults to 10 seconds
+        double duration = 20E6; //Defaults to 10 seconds
         int packetSize = 1536; //Defaults to 1536 bytes
         int numHosts = 5; //Defaults to 5 hosts
 
