@@ -1,31 +1,46 @@
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-numHost = range(31)[1:]
-utilizations = defaultdict(lambda: defaultdict(list))
-		
-with open("utilization_data.txt", "r") as f:
-	for line in f:
-		num_hosts_s, packet_size_s, utilization_s = line.split()		
-		utilizations[int(packet_size_s)][int(num_hosts_s)].append(float(utilization_s))
+def parse(path):
+	utilizations = defaultdict(lambda: defaultdict(list))
+	with open(path, "r") as f:
+		for line in f:
+			num_hosts_s, packet_size_s, utilization_s = line.split()		
+			utilizations[int(packet_size_s)][int(num_hosts_s)].append(float(utilization_s))
+	return utilizations
 
-#Plot graphs
-plt.xlim(0,30)
-plt.ylim(7,10)
-plt.xlabel("Number of hosts")
-plt.ylabel("utilization")
-
-#for key in utilizations:
-#    print key, utilizations[key], len(utilizations[key])
-
-from pprint import pprint
-pprint(utilizations)
-
-for packet_size, dataset in utilizations.iteritems():
-	dataset = sorted(dataset.items(), key = lambda (k, v): k)	
-	keys, values = zip(*dataset)
+def unitlinspace(n):
+	return [x / float(n) for x in range(n+1)]
 	
-	plt.plot(keys, values, label=packet_size)
+def plot_data(data):
+	color=iter(plt.cm.rainbow(unitlinspace(len(data))))
 
-#plt.legend()
-plt.show()
+	for packet_size, dataset in sorted(data.items()):
+		dataset = sorted(dataset.items())	
+		keys, values = zip(*dataset)
+		plt.plot(keys, values, label=packet_size, c=next(color))
+
+	plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+	plt.show()
+	
+def plot_utilization():
+	plt.xlim(0,30)
+	plt.ylim(7,10)
+	plt.xlabel("Number of hosts")
+	plt.ylabel("Utilization")
+	plot_data(parse("utilization_data.txt"))
+
+	
+def plot_sd():
+	plt.xlim(0,30)
+	plt.xlabel("Number of hosts")
+	plt.ylabel("Standard deviation")
+	plot_data(parse("standard_deviation_data.txt"))
+
+from sys import argv
+if len(argv) > 1 and argv[1] == "sd":
+	print("plotting sd")
+	plot_sd()
+else:
+	print("plotting utilization")
+	plot_utilization()

@@ -147,13 +147,23 @@ public class EthernetSimulator {
     public static void main(String[] args) {
         double duration = 20E6;
         int maxHosts = 30;
-        List<Integer> packetSizes = new ArrayList<>();
-        packetSizes.add(64);
-        packetSizes.add(256);
-        packetSizes.add(1536);
+        List<Integer> packetSizes = new ArrayList<>(Arrays.asList(
+                64,
+                128,
+                256,
+                512,
+                768,
+                1024,
+                1536,
+                2048,
+                3072,
+                4000
+        ));
 
         try {
-            PrintWriter out = new PrintWriter("utilization_data.txt");
+            PrintWriter utilOut = new PrintWriter("utilization_data.txt");
+            PrintWriter sdOut = new PrintWriter("standard_deviation_data.txt");
+
             List<Thread> threads = new ArrayList<>();
 
             for (int packetSize : packetSizes) {
@@ -164,7 +174,8 @@ public class EthernetSimulator {
                         public void run() {
                             EthernetSimulator simulator = new EthernetSimulator(threadNumHosts, packetSize * 8);
                             simulator.simulate(duration);
-                            out.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeUtilization());
+                            utilOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeUtilization());
+                            sdOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeStandardDeviationUtilization());
                         }
                     });
                     t.start();
@@ -174,7 +185,8 @@ public class EthernetSimulator {
             for (Thread t : threads) {
                 t.join();
             }
-            out.close();
+            utilOut.close();
+            sdOut.close();
         } catch (IOException x){
             System.err.println(x);
         } catch (InterruptedException e) {
