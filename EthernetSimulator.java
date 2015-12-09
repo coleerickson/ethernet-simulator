@@ -72,26 +72,28 @@ public class EthernetSimulator {
     }
 
     public double computeNodeUtilizationStandardDeviation(List<Node> nodes, double time) {
-//        return -1;
-        double totalBitRate = 0;
-        double numberOfHosts = nodes.size();
-        List<double> utilizations = new List<double>();
-        for (Node node : nodes) {
-            double utilization = computeUtilizationForOneNode(node, time);
-            totalBitRate += utilization;
-            utilizations.add(utilization);
-        }
-        double mean = totalBitRate / numberOfHosts;
-        double totalOfSquares = 0;
-        double meanOfSquares = 0;
-
-        for (double utilizations : utilization) {
-            totalOfSquares += subtractSquareMean(utilization, mean);
-        }
-
-        meanOfSquares = Math.sqrt(totalOfSquares / numberOfHosts);
-
-        return meanOfSquares;
+        return -1;
+//        System.out.println("THE TOTAL BIT RATE: " + nodes);
+//        double totalBitRate = 0;
+//        double numberOfHosts = nodes.size();
+//        List<double> utilizations = new List<double>();
+//        for (Node node : nodes) {
+//            double utilization = computeUtilizationForOneNode(node, time);
+//            totalBitRate += utilization;
+//            System.out.println("THE TOTAL BIT RATE: " + totalBitRate);
+//            utilizations.add(utilization);
+//        }
+//        double mean = totalBitRate / numberOfHosts;
+//        double totalOfSquares = 0;
+//        double meanOfSquares = 0;
+//
+//        for (double utilizations : utilization) {
+//            totalOfSquares += subtractSquareMean(utilization, mean);
+//        }
+//
+//        meanOfSquares = Math.sqrt(totalOfSquares / numberOfHosts);
+//
+//        return meanOfSquares;
     }
 
     public void simulate(double duration) {
@@ -131,6 +133,7 @@ public class EthernetSimulator {
 
         double utilization = computeUtilization(nodes, time);
         double standardDeviation = computeNodeUtilizationStandardDeviation(nodes, time);
+        System.out.println("THE STDEV: " + standardDeviation);
 
         // we will modify this to report data at shorter intervals throughout the execution
         System.out.println("The overall utilization of the network was: " + utilization);
