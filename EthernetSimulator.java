@@ -56,17 +56,17 @@ public class EthernetSimulator {
         eventQueue.add(e);
     }
 
-    public double computeUtilization(List<Node> nodes) {
+    public double computeUtilization() {
         double totalBits = 0;
         for (Node node : nodes) {
-            totalBits += node.successfulPackets * (node.getPacketSize() + PACKET_OVERHEAD_BITS);
+            totalBits += node.getBitsSent();
         }
         double utilization = totalBits / time;
         return utilization;
     }
 
-    public double computeStandardDeviationUtilization(List<Node> nodes) {
-        double meanUtilization = computeUtilization(nodes) / nodes.size();
+    public double computeStandardDeviationUtilization() {
+        double meanUtilization = computeUtilization() / nodes.size();
 
         double squaredDeviations = 0;
         for (Node node : nodes) {
@@ -118,26 +118,11 @@ public class EthernetSimulator {
             event = eventQueue.poll();
         }
 
-        double utilization = computeUtilization(nodes);
-        double standardDeviation = computeStandardDeviationUtilization(nodes);
-
         // we will modify this to report data at shorter intervals throughout the execution
-        //System.out.println("The overall utilization of the network was: " + utilization);
-        //System.out.println("The standard deviation of the utilization across all hosts was: "
-        //+ standardDeviation);
+        System.out.println("The overall utilization of the network was: " + computeUtilization());
+        System.out.println("The standard deviation of the utilization across all hosts was: " + computeStandardDeviationUtilization());
 
-        //Writing data to file.
-        Path file = Paths.get("utilization_data_" + (packetSize / 8) + ".txt");
-        String dataPoint = utilization + "\n";
-        byte[] dataPointBytes = dataPoint.getBytes();
-
-        try(OutputStream out = new BufferedOutputStream(Files.newOutputStream(file, CREATE, APPEND))){
-          out.write(dataPointBytes,0,dataPointBytes.length);
-        } catch (IOException x){
-          System.err.println(x);
-        }
-
-        //System.out.println("Done.");
+        System.out.println("Done.");
     }
 
     public double getTime() {
@@ -160,22 +145,40 @@ public class EthernetSimulator {
     * Takes one argument: the number of microseconds that should be simulated.
     */
     public static void main(String[] args) {
-        double duration = 20E6; //Defaults to 10 seconds
-        int packetSize = 1536; //Defaults to 1536 bytes
-        int numHosts = 5; //Defaults to 5 hosts
+        double duration = 20E6;
+        int maxHosts = 30;
+        List<Integer> packetSizes = new ArrayList<>();
+        packetSizes.add(64);
+        packetSizes.add(256);
+        packetSizes.add(1536);
 
-        if(args.length < 3 ){
-          System.err.println("ERROR: Missing Args.\n");
-        } else {
-          try {
-            packetSize = Integer.parseInt(args[0]);
-            numHosts = Integer.parseInt(args[1]);
-            duration = Double.parseDouble(args[2]);
-          } catch(NumberFormatException x){
+        try {
+            PrintWriter out = new PrintWriter("utilization_data.txt");
+            List<Thread> threads = new ArrayList<>();
+
+            for (int packetSize : packetSizes) {
+                for (int numHosts = 1; numHosts <= maxHosts; numHosts++) {
+                    final int threadNumHosts = numHosts;
+                    Thread t = new Thread(new Runnable() {
+
+                        public void run() {
+                            EthernetSimulator simulator = new EthernetSimulator(threadNumHosts, packetSize * 8);
+                            simulator.simulate(duration);
+                            out.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeUtilization());
+                        }
+                    });
+                    t.start();
+                    threads.add(t);
+                }
+            }
+            for (Thread t : threads) {
+                t.join();
+            }
+            out.close();
+        } catch (IOException x){
             System.err.println(x);
-          }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-
-        new EthernetSimulator(numHosts, packetSize * 8).simulate(duration);
     }
 }
