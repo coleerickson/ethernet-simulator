@@ -20,7 +20,7 @@ for packet_size in packet_sizes:
 
 #Plot graphs
 plt.xlim(0,30)
-plt.ylim(0,10)
+plt.ylim(7,10)
 plt.xlabel("Number of hosts")
 plt.ylabel("utilization")
 

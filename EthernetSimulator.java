@@ -10,7 +10,8 @@ public class EthernetSimulator {
                                MAX_PROPAGATION_DELAY = 232 * BIT_TIME,
                                COLLECT_DATA_INTERVAL = 1.0E6; // Data collection interval is 1 second by default.
 
-    public static final int PREAMBLE_SIZE = 64;
+    public static final int PACKET_OVERHEAD_BITS = 20 * 8;
+
 
     private PriorityQueue<EthernetEvent> eventQueue;
     private List<Node> nodes;
@@ -57,7 +58,7 @@ public class EthernetSimulator {
     public double computeUtilization(List<Node> nodes, double time) {
         double totalBits = 0;
         for (Node node : nodes) {
-            totalBits += node.successfulPackets * ( node.getPacketSize() + 16 * 8 ) + node.preamblesSent * PREAMBLE_SIZE;
+            totalBits += node.successfulPackets * (node.getPacketSize() + PACKET_OVERHEAD_BITS) ;
         }
         double utilization = totalBits / time;
         return utilization;
