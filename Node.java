@@ -29,8 +29,10 @@ public class Node {
     // The size of packets (in bits) that this node sends
     private int packetSize;
 
-    // The backoff windows used in the Ethernet binary exponential backoff algorithm
+    // The backoff window used in the Ethernet binary exponential backoff algorithm
     public int backoffWindow;
+    public double beginningAttemptTime;
+    public List<Double> transmissionDelays;
 
     // number of packets passing by the receiver
     // increment on start of preamble, contents, jamming
@@ -39,7 +41,6 @@ public class Node {
 
     // a count of the number of packets that have been successfully sent
     public double successfulPackets;
-    public double preamblesSent;
 
     public ReceiverState receiver;
     public TransmitterState transmitter;
@@ -53,6 +54,7 @@ public class Node {
         this.name = "Host " + number;
         this.packetSize = packetSize;
         this.simulator = simulator;
+        this.transmissionDelays = new ArrayList<>();
         this.repeater = repeater;
 
         backoffWindow = 0;

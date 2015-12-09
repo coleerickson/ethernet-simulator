@@ -33,6 +33,11 @@ public class ContentsEvent extends RoutedDataEvent {
 
             ++source.successfulPackets;
 
+            // store transmission delay
+            if (source.beginningAttemptTime != 0) {
+                source.transmissionDelays.add(scheduledTime - source.beginningAttemptTime);
+                source.beginningAttemptTime = 0;
+            }
 
             source.transmitter = Node.TransmitterState.PREPARING_NEXT_PACKET;
             simulator.add(new PacketReadyEvent(simulator, source, super.scheduledTime));

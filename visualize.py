@@ -26,8 +26,8 @@ def plot_data(data):
 	
 def plot_utilization():
 	plt.xlim(0,30)
-	plt.ylim(7,10)
-	plt.xlabel("Number of hosts")
+	#plt.ylim(7,10)
+	plt.xlabel("Number of Hosts")
 	plt.ylabel("Utilization")
 	plot_data(parse("utilization_data.txt"))
 	plt.savefig("util.png")
@@ -35,13 +35,27 @@ def plot_utilization():
 	
 def plot_sd():
 	plt.xlim(0,30)
-	plt.xlabel("Number of hosts")
+	plt.xlabel("Number of Hosts")
+	plt.ylabel("Standard Deviation of Utilization")
 	plot_data(parse("standard_deviation_data.txt"))
+	
+def plot_packet_rate():
+	plt.xlim(0,30)
+	plt.xlabel("Number of Hosts")
+	plt.ylabel("Packet Rate")
+	plot_data(parse("packet_data.txt"))
 
 from sys import argv
-if len(argv) > 1 and argv[1] == "sd":
-	print("plotting sd")
-	plot_sd()
+if len(argv) > 1:
+	if argv[1] == "sd":
+		print("plotting sd")
+		plot_sd()
+	elif argv[1] == "packet":
+		print("plotting packet rate")
+		plot_packet_rate()
+	else:
+		print("parameter not understood, plotting utilization")
+		plot_utilization()
 else:
 	print("plotting utilization")
 	plot_utilization()
