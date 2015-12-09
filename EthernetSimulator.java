@@ -145,7 +145,7 @@ public class EthernetSimulator {
     */
     public static void main(String[] args) {
         double duration = 10E6; //Defaults to 10 seconds
-        int packetSize = 256; //Defaults to 1536 bytes
+        int packetSize = 1536; //Defaults to 1536 bytes
         int numHosts = 5; //Defaults to 5 hosts
 
         if(args.length < 3 ){
