@@ -19,43 +19,65 @@ def plot_data(data):
 		dataset = sorted(dataset.items())	
 		keys, values = zip(*dataset)
 		plt.plot(keys, values, label=packet_size, c=next(color))
-
-	plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-	plt.savefig("plot.png")
-	plt.show()
 	
 def plot_utilization():
+	print("plotting utilization")
+	plt.title("Utilization")
 	plt.xlim(0,30)
 	#plt.ylim(7,10)
 	plt.xlabel("Number of Hosts")
-	plt.ylabel("Utilization")
+	plt.ylabel("Utilization (Mb/s)")
 	plot_data(parse("utilization_data.txt"))
 	plt.savefig("util.png")
 
 	
 def plot_sd():
+	print("plotting sd")
+	plt.title("Standard Deviation of Utilization")
 	plt.xlim(0,30)
 	plt.xlabel("Number of Hosts")
-	plt.ylabel("Standard Deviation of Utilization")
+	plt.ylabel("Standard Deviation of Utilization (Mb/s)")
 	plot_data(parse("standard_deviation_data.txt"))
 	
 def plot_packet_rate():
+	print("plotting packet rate")
+	plt.title("Packet Rate")
 	plt.xlim(0,30)
 	plt.xlabel("Number of Hosts")
-	plt.ylabel("Packet Rate")
+	plt.ylabel("Packet Rate (packets/s)")
 	plot_data(parse("packet_data.txt"))
+	
+def plot_delay():
+	print("plotting transmission delay")
+	plt.title("Transmission Delay")
+	plt.xlim(0,30)
+	plt.xlabel("Number of Hosts")
+	plt.ylabel("Average of Host Transmission Delay Averages (ms)")
+	plot_data(parse("delay_data.txt"))
 
 from sys import argv
 if len(argv) > 1:
 	if argv[1] == "sd":
-		print("plotting sd")
 		plot_sd()
 	elif argv[1] == "packet":
-		print("plotting packet rate")
 		plot_packet_rate()
+	elif argv[1] == "delay":
+		plot_delay()
 	else:
-		print("parameter not understood, plotting utilization")
-		plot_utilization()
+		plot_utilization()	
+
+	plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+	plt.show()
 else:
-	print("plotting utilization")
+	#plt.figure(num=None, figsize=(8, 6), dpi=100, facecolor='w', edgecolor='k')
+	plt.subplot(2, 2, 1)
 	plot_utilization()
+	plt.subplot(2, 2, 2)
+	plot_sd()
+	plt.subplot(2, 2, 3)
+	plot_packet_rate()
+	plt.subplot(2, 2, 4)
+	plot_delay()
+	
+	plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+	plt.show()

@@ -32,7 +32,7 @@ public class Node {
     // The backoff window used in the Ethernet binary exponential backoff algorithm
     public int backoffWindow;
     public double beginningAttemptTime;
-    public List<Double> transmissionDelays;
+    public double totalTransmissionDelay;
 
     // number of packets passing by the receiver
     // increment on start of preamble, contents, jamming
@@ -54,7 +54,6 @@ public class Node {
         this.name = "Host " + number;
         this.packetSize = packetSize;
         this.simulator = simulator;
-        this.transmissionDelays = new ArrayList<>();
         this.repeater = repeater;
 
         backoffWindow = 0;

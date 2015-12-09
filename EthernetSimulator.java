@@ -60,7 +60,7 @@ public class EthernetSimulator {
             totalBits += node.getBitsSent();
         }
         double utilization = totalBits / (time - COLLECT_DATA_START_TIME);
-        return utilization; // no conversion needed -- bits per microsec == megabits per sec
+        return utilization; // no conversion needed: bits per microsec == megabits per sec
     }
 
     public double computeStandardDeviationUtilization() {
@@ -77,7 +77,7 @@ public class EthernetSimulator {
         }
         double variance = squaredDeviations / (double)nodes.size();
         double standardDeviation = Math.sqrt(variance);
-        return standardDeviation;
+        return standardDeviation; // no conversion needed: bits per microsec == megabits per sec
     }
 
     public double computePacketRate() {
@@ -96,19 +96,15 @@ public class EthernetSimulator {
 
         double totalOfNodeAvgs = 0;
         for (Node node : nodes) {
-            double totalDelayInNode = 0;
-            for (double x : node.transmissionDelays) {
-                totalDelayInNode += x;
-            }
-            totalOfNodeAvgs += totalDelayInNode / node.successfulPackets;
+            totalOfNodeAvgs += node.totalTransmissionDelay / node.successfulPackets;
         }
         double averageTransmissionDelay = totalOfNodeAvgs / nodes.size();
-        return averageTransmissionDelay * 1E6; // convert microseconds to seconds
+        return averageTransmissionDelay / 1E3; // convert microseconds to milliseconds
     }
 
     public void resetAnalytics() {
         for (Node node : nodes) {
-            node.transmissionDelays = new ArrayList<>();
+            node.totalTransmissionDelay = 0;
             node.successfulPackets = 0;
         }
     }
@@ -184,7 +180,7 @@ public class EthernetSimulator {
     public static void main(String[] args) {
         // we run for 15 seconds and collect data after 5 seconds to match Boggs et al
         double duration = 15E6;
-        int maxHosts = 30;
+        int maxHosts = 25;
         List<Integer> packetSizes = new ArrayList<>(Arrays.asList(
                 64,
                 128,

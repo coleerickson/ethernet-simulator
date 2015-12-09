@@ -35,7 +35,7 @@ public class ContentsEvent extends RoutedDataEvent {
 
             // store transmission delay
             if (source.beginningAttemptTime != 0) {
-                source.transmissionDelays.add(scheduledTime - source.beginningAttemptTime);
+                source.totalTransmissionDelay += scheduledTime - source.beginningAttemptTime;
                 source.beginningAttemptTime = 0;
             }
 
