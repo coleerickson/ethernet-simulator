@@ -40,8 +40,8 @@ public class BackoffEvent extends EthernetEvent {
 
         int waitingTimeSlots = simulator.getRandom().nextInt(1 << backoffWindow);
 
-        System.out.println("[***] Back off round " + source.backoffWindow + " : Back off window is " + backoffWindow +
-                           " and going to wait " + waitingTimeSlots + " slots.");
+        //System.out.println("[***] Back off round " + source.backoffWindow + " : Back off window is " + backoffWindow +
+	//" and going to wait " + waitingTimeSlots + " slots.");
 
         simulator.add(new BackoffEvent(simulator, source, dest, scheduledTime + SLOT_WAITING_TIME * waitingTimeSlots, !complete));
       } else {
