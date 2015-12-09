@@ -17,8 +17,10 @@ public class EthernetSimulator {
     private Layout layout;
     private Random random;
     private double time;
+	private int packetSize;
 
     public EthernetSimulator(int hosts, int packetSize) {
+		this.packetSize = packetSize;
         eventQueue = new PriorityQueue<>();
         nodes = new ArrayList<>();
         random = new Random(0L);

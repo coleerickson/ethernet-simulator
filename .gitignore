@@ -3,4 +3,6 @@
 out/
 .idea/
 *.iml
+<<<<<<< HEAD
 .idea/
+*.DS_Store
