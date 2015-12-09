@@ -74,28 +74,28 @@ public class EthernetSimulator {
     }
 
     public double computeNodeUtilizationStandardDeviation(List<Node> nodes, double time) {
-        return -1;
+//        return -1;
 //        System.out.println("THE TOTAL BIT RATE: " + nodes);
-//        double totalBitRate = 0;
-//        double numberOfHosts = nodes.size();
-//        List<double> utilizations = new List<double>();
-//        for (Node node : nodes) {
-//            double utilization = computeUtilizationForOneNode(node, time);
-//            totalBitRate += utilization;
+        double totalBitRate = 0;
+        double numberOfHosts = nodes.size();
+        List<Double> listOfUtilizations = new ArrayList<>();
+        for (Node node : nodes) {
+            double utilization = computeUtilizationForOneNode(node, time);
+            totalBitRate += utilization;
 //            System.out.println("THE TOTAL BIT RATE: " + totalBitRate);
-//            utilizations.add(utilization);
-//        }
-//        double mean = totalBitRate / numberOfHosts;
-//        double totalOfSquares = 0;
-//        double meanOfSquares = 0;
-//
-//        for (double utilizations : utilization) {
-//            totalOfSquares += subtractSquareMean(utilization, mean);
-//        }
-//
-//        meanOfSquares = Math.sqrt(totalOfSquares / numberOfHosts);
-//
-//        return meanOfSquares;
+            listOfUtilizations.add(utilization);
+        }
+        double mean = totalBitRate / numberOfHosts;
+        double totalOfSquares = 0;
+        double meanOfSquares = 0;
+
+        for (Double utilization: listOfUtilizations) {
+            totalOfSquares += subtractSquareMean(utilization, mean);
+        }
+
+        meanOfSquares = Math.sqrt(totalOfSquares / numberOfHosts);
+
+        return meanOfSquares;
     }
 
     public void simulate(double duration) {
