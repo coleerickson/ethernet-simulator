@@ -10,7 +10,8 @@ public class EthernetSimulator {
                                MAX_PROPAGATION_DELAY = 232 * BIT_TIME,
                                COLLECT_DATA_INTERVAL = 1.0E6; // Data collection interval is 1 second by default.
 
-    public static final int PREAMBLE_SIZE = 64;
+    // The amount of packet overhead in bits. We use 20 bytes of overhead instead of 24 because we do not include a CRC in our simulation.
+    public static final int PACKET_OVERHEAD_BITS = 20 * 8;
 
     private PriorityQueue<EthernetEvent> eventQueue;
     private List<Node> nodes;
@@ -56,7 +57,7 @@ public class EthernetSimulator {
     public double computeUtilization(List<Node> nodes, double time) {
         double totalBits = 0;
         for (Node node : nodes) {
-            totalBits += node.successfulPackets * node.getPacketSize() + node.preamblesSent * PREAMBLE_SIZE;
+            totalBits += node.successfulPackets * (node.getPacketSize() + PACKET_OVERHEAD_BITS);
         }
         double utilization = totalBits / time;
         return utilization;
@@ -144,7 +145,7 @@ public class EthernetSimulator {
     */
     public static void main(String[] args) {
         double duration = 10E6; //Defaults to 10 seconds
-        int packetSize = 1536; //Defaults to 1536 bytes
+        int packetSize = 256; //Defaults to 1536 bytes
         int numHosts = 5; //Defaults to 5 hosts
 
         if(args.length < 3 ){
