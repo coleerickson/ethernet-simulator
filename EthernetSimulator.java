@@ -135,7 +135,6 @@ public class EthernetSimulator {
 
         double utilization = computeUtilization(nodes, time);
         double standardDeviation = computeNodeUtilizationStandardDeviation(nodes, time);
-        System.out.println("THE STDEV: " + standardDeviation);
 
         // we will modify this to report data at shorter intervals throughout the execution
         System.out.println("The overall utilization of the network was: " + utilization);
