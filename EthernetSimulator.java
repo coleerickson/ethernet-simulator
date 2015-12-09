@@ -32,7 +32,7 @@ public class EthernetSimulator {
                 if (a == b) {
                     return 0;
                 } else {
-                  double twoRepeaterDelay = 1E6 * 250 / 2E8;
+                  double twoRepeaterDelay = 1E6 * 300 / 2E8;
                   // Here I make the assumption that signals travel at 2E8 m/s and that two neighboring repeaters
                   // are sepearated by 300 meters.
                   return 2 * DELAY_TO_REPEATER + twoRepeaterDelay * Math.abs((a.getRepeater() - b.getRepeater()));
@@ -57,7 +57,7 @@ public class EthernetSimulator {
     public double computeUtilization(List<Node> nodes, double time) {
         double totalBits = 0;
         for (Node node : nodes) {
-            totalBits += node.successfulPackets * node.getPacketSize() + node.preamblesSent * PREAMBLE_SIZE;
+            totalBits += node.successfulPackets * ( node.getPacketSize() + 16 * 8 ) + node.preamblesSent * PREAMBLE_SIZE;
         }
         double utilization = totalBits / time;
         return utilization;
@@ -68,7 +68,7 @@ public class EthernetSimulator {
     }
 
     public void simulate(double duration) {
-        System.out.println("Simulating " + duration + " microseconds of the network. One bit time is " + BIT_TIME + " microseconds.");
+        //System.out.println("Simulating " + duration + " microseconds of the network. One bit time is " + BIT_TIME + " microseconds.");
 
         double collectData = COLLECT_DATA_INTERVAL;
         double previousUtilization =  0; // Keeps track of network utilization during the last data collection period (defaults to 1 second)
@@ -106,9 +106,9 @@ public class EthernetSimulator {
         double standardDeviation = computeNodeUtilizationStandardDeviation(nodes);
 
         // we will modify this to report data at shorter intervals throughout the execution
-        System.out.println("The overall utilization of the network was: " + utilization);
-        System.out.println("The standard deviation of the utilization across all hosts was: "
-        + standardDeviation);
+        //System.out.println("The overall utilization of the network was: " + utilization);
+        //System.out.println("The standard deviation of the utilization across all hosts was: "
+        //+ standardDeviation);
 
         //Writing data to file.
         Path file = Paths.get("utilization_data_" + (packetSize / 8) + ".txt");
@@ -121,7 +121,7 @@ public class EthernetSimulator {
           System.err.println(x);
         }
 
-        System.out.println("Done.");
+        //System.out.println("Done.");
     }
 
     public double getTime() {
