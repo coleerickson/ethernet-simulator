@@ -23,8 +23,7 @@ def plot_data(data):
 def plot_utilization():
 	print("plotting utilization")
 	plt.title("Utilization")
-	plt.xlim(0,30)
-	#plt.ylim(7,10)
+	plt.ylim(7,10)
 	plt.xlabel("Number of Hosts")
 	plt.ylabel("Utilization (Mb/s)")
 	plot_data(parse("utilization_data.txt"))
@@ -34,7 +33,6 @@ def plot_utilization():
 def plot_sd():
 	print("plotting sd")
 	plt.title("Standard Deviation of Utilization")
-	plt.xlim(0,30)
 	plt.xlabel("Number of Hosts")
 	plt.ylabel("Standard Deviation of Utilization (Mb/s)")
 	plot_data(parse("standard_deviation_data.txt"))
@@ -42,7 +40,6 @@ def plot_sd():
 def plot_packet_rate():
 	print("plotting packet rate")
 	plt.title("Packet Rate")
-	plt.xlim(0,30)
 	plt.xlabel("Number of Hosts")
 	plt.ylabel("Packet Rate (packets/s)")
 	plot_data(parse("packet_data.txt"))
@@ -50,7 +47,6 @@ def plot_packet_rate():
 def plot_delay():
 	print("plotting transmission delay")
 	plt.title("Transmission Delay")
-	plt.xlim(0,30)
 	plt.xlabel("Number of Hosts")
 	plt.ylabel("Average of Host Transmission Delay Averages (ms)")
 	plot_data(parse("delay_data.txt"))

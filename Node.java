@@ -7,10 +7,10 @@ public class Node {
     // The amount of packet overhead in bits. We use 20 bytes of overhead instead of 24 because we do not include a CRC in our simulation.
     public static final int PACKET_OVERHEAD_BITS = 20 * 8;
     public static final double SLOT_WAITING_TIME = 512 * EthernetSimulator.BIT_TIME; // waiting time for one slot, in microseconds
-    public static final double AVERAGE_COLLISION_DURATION = ((PACKET_OVERHEAD_BITS + 1536 * 8) * 0.7 + JammingEvent.BIT_TIME_DURATION) * EthernetSimulator.BIT_TIME;
-    public static final double IDLE_SENSE_TARGET_IDLE_SLOTS = 5.68; // TODO compute
-    public static final double IDLE_SENSE_MULTIPLICATIVE_DECREASE_CONSTANT = 0.001; // epsilon TODO
-    public static final double IDLE_SENSE_ADDITIVE_INCREASE_CONSTANT = 1 / 1.2; // alpha TODO
+    // average collision duration was 92.1 computed from simulated data. with slot time of 51.2, implies gamma = 0.803, implies optimal idle slots is 0.8106
+    public static final double IDLE_SENSE_TARGET_IDLE_SLOTS = 10;
+    public static final double IDLE_SENSE_MULTIPLICATIVE_DECREASE_CONSTANT = 0.001; // epsilon from paper
+    public static final double IDLE_SENSE_ADDITIVE_INCREASE_CONSTANT = 1 / 1.2; // alpha from paper
 
 
     enum ReceiverState {
@@ -174,6 +174,7 @@ public class Node {
         assert this.lastObservedTransmissionEnd == -1;
         this.lastObservedTransmissionEnd = currentTime;
         this.idleSenseSum += this.idleSlotsBeforeTransmission;
+        ++idleSenseNtrans;
         if (this.idleSenseNtrans >= idleSenseMaxtrans) {
             // compute idle slots estimator
             double idleSlotsEstimate = idleSenseSum / idleSenseNtrans;
@@ -201,6 +202,8 @@ public class Node {
     public int getBackoffSlots() {
         int cw = (int)contentionWindow;
         assert cw >= 0;
+
+        //System.out.println(getName() + " (" + simulator.getNodes().size() + ") " + packetSize / 8 + " @ " + simulator.getTime() + ": " + cw);
 
         if (cw > 0) {
             return simulator.getRandom().nextInt(cw);
