@@ -22,7 +22,7 @@ public class PreambleEvent extends RoutedDataEvent {
         if (source == dest) {
 
             // keep track of when we start trying to send a packet so that we can measure transmission delay
-            if (source.beginningAttemptTime == 0) {
+            if (source.beginningAttemptTime == -1) {
                 source.beginningAttemptTime = scheduledTime;
             }
 

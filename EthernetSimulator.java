@@ -2,6 +2,9 @@ import java.util.*;
 import java.nio.file.*;
 import static java.nio.file.StandardOpenOption.*;
 import java.io.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EthernetSimulator {
     // Bit rate in bits per microsecond, bit time in microseconds
@@ -145,7 +148,7 @@ public class EthernetSimulator {
 
 
             if (!event.isCanceled()) {
-                //System.out.println(event);
+                // System.out.println(event);
                 event.process();
             }
 
@@ -174,10 +177,7 @@ public class EthernetSimulator {
         return nodes;
     }
 
-    /**
-    * Takes one argument: the number of microseconds that should be simulated.
-    */
-    public static void main(String[] args) {
+    public static void fullTest() {
         // we run for 15 seconds and collect data after 5 seconds to match Boggs et al
         double duration = 15E6;
         int maxHosts = 25;
@@ -232,5 +232,18 @@ public class EthernetSimulator {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+    * Takes one argument: the number of microseconds that should be simulated.
+    */
+    public static void main(String[] args) {
+//        EthernetSimulator sim = new EthernetSimulator(3, 1536);
+//        sim.simulate(100E6);
+//        System.out.println(sim.computeUtilization());
+//        System.out.println(sim.computePacketRate());
+//        System.out.println(sim.computeStandardDeviationUtilization());
+
+        fullTest();
     }
 }

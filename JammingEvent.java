@@ -23,8 +23,9 @@ public class JammingEvent extends RoutedDataEvent {
 
             // if this is the end of the jamming signal, then we move right into backoff unconditionally.
             if (!start) {
+                // TODO do we need to drop packets after a certain number of attempts in idle sense?
                 source.transmitter = Node.TransmitterState.WAITING_FOR_BACKOFF;
-                simulator.add(new BackoffEvent(simulator, source, scheduledTime, false));
+                simulator.add(new ContentionWindowEvent(simulator, source, scheduledTime));
             }
         }
     }

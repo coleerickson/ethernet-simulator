@@ -65,11 +65,7 @@ if len(argv) > 1:
 		plot_delay()
 	else:
 		plot_utilization()	
-
-	plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-	plt.show()
 else:
-	#plt.figure(num=None, figsize=(8, 6), dpi=100, facecolor='w', edgecolor='k')
 	plt.subplot(2, 2, 1)
 	plot_utilization()
 	plt.subplot(2, 2, 2)
@@ -78,6 +74,5 @@ else:
 	plot_packet_rate()
 	plt.subplot(2, 2, 4)
 	plot_delay()
-	
-	plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-	plt.show()
+plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+plt.show()

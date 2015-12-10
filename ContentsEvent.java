@@ -34,9 +34,9 @@ public class ContentsEvent extends RoutedDataEvent {
             ++source.successfulPackets;
 
             // store transmission delay
-            if (source.beginningAttemptTime != 0) {
+            if (source.beginningAttemptTime != -1) {
                 source.totalTransmissionDelay += scheduledTime - source.beginningAttemptTime;
-                source.beginningAttemptTime = 0;
+                source.beginningAttemptTime = -1;
             }
 
             source.transmitter = Node.TransmitterState.PREPARING_NEXT_PACKET;
