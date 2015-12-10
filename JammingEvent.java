@@ -8,7 +8,7 @@ Triggers jamming transmitter state if it is transmitting content.
 
 public class JammingEvent extends RoutedDataEvent {
     // The duration of a jamming signal in bit times.
-    public static final double BIT_TIME_DURATION = 32;
+    public static final int BIT_TIME_DURATION = 32;
 
     public JammingEvent(EthernetSimulator simulator, Node source, Node dest, double currentTime, boolean start) {
         super(simulator, source, dest, currentTime, start);
@@ -23,8 +23,9 @@ public class JammingEvent extends RoutedDataEvent {
 
             // if this is the end of the jamming signal, then we move right into backoff unconditionally.
             if (!start) {
+                // TODO do we need to drop packets after a certain number of attempts in idle sense?
                 source.transmitter = Node.TransmitterState.WAITING_FOR_BACKOFF;
-                simulator.add(new BackoffEvent(simulator, source, dest, scheduledTime, false));
+                simulator.add(new ContentionWindowEvent(simulator, source, scheduledTime));
             }
         }
     }

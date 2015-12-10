@@ -1,9 +1,14 @@
-rm utilization_data.txt
+rm *.txt
 javac *.java
 
 if [ $? == 0 ]; then
-	for i in {1..30}
+	for j in 64 128 256 512 768 1536 3072
 	do
-		java -ea EthernetSimulator 1536 $i 10E6;
+		for i in {1..30}
+		do
+			java -ea EthernetSimulator $j $i 10E6;
+		done
 	done
 fi
+
+python visualize.py

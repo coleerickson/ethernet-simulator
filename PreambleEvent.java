@@ -20,10 +20,14 @@ public class PreambleEvent extends RoutedDataEvent {
 
         // If this is the node that sent the event, either send contents or jam due to collision
         if (source == dest) {
+
+            // keep track of when we start trying to send a packet so that we can measure transmission delay
+            if (source.beginningAttemptTime == -1) {
+                source.beginningAttemptTime = scheduledTime;
+            }
+
             assert source.transmitter == Node.TransmitterState.TRANSMITTING_PREAMBLE;
             if (!start) {
-
-                ++source.preamblesSent;
 
                 if (source.receiver == Node.ReceiverState.BUSY) {
                     source.interruptTransmission(super.scheduledTime);

@@ -28,6 +28,12 @@ public abstract class RoutedDataEvent extends EthernetEvent {
                 dest.receiver = Node.ReceiverState.BUSY;
             }
 
+            // whenever we see the beginning of data transfer, we end our tracking of idle slots
+            if (dest.lastObservedTransmissionEnd != -1) {
+                dest.idleSlotsBeforeTransmission += (dest.lastObservedTransmissionEnd - scheduledTime) / Node.SLOT_WAITING_TIME;
+                dest.lastObservedTransmissionEnd = -1;
+            }
+
             // If the destination node is transmitting when it receives the start of data, then that is a collision!
             // We have to check if the source node is the same as the destination node, though, because we don't want
             // to detect our own transmission as colliding with itself

@@ -1,7 +1,18 @@
+import com.sun.xml.internal.ws.api.message.Packet;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
+    // The amount of packet overhead in bits. We use 20 bytes of overhead instead of 24 because we do not include a CRC in our simulation.
+    public static final int PACKET_OVERHEAD_BITS = 20 * 8;
+    public static final double SLOT_WAITING_TIME = 512 * EthernetSimulator.BIT_TIME; // waiting time for one slot, in microseconds
+    public static final double AVERAGE_COLLISION_DURATION = ((PACKET_OVERHEAD_BITS + 1536 * 8) * 0.7 + JammingEvent.BIT_TIME_DURATION) * EthernetSimulator.BIT_TIME;
+    public static final double IDLE_SENSE_TARGET_IDLE_SLOTS = 5.68; // TODO compute
+    public static final double IDLE_SENSE_MULTIPLICATIVE_DECREASE_CONSTANT = 0.001; // epsilon TODO
+    public static final double IDLE_SENSE_ADDITIVE_INCREASE_CONSTANT = 1 / 1.2; // alpha TODO
+
+
     enum ReceiverState {
         BUSY,
         WAITING_INTERPACKET,
@@ -26,36 +37,41 @@ public class Node {
     // The size of packets (in bits) that this node sends
     private int packetSize;
 
-    // The backoff windows used in the Ethernet binary exponential backoff algorithm
-    public int backoffWindow;
+    // Delay analytics
+    public double beginningAttemptTime = -1;
+    public double totalTransmissionDelay = 0;
+
+    // Used for computing the number of idle slots in idle sense algorithm
+    public double lastObservedTransmissionEnd = -1;
+    public double idleSlotsBeforeTransmission = 0; // n_i in idle sense
+    public int idleSenseMaxtrans = 5; // Grunenberger et al
+    public double idleSenseNtrans = 0; // number of transmissions since recomputation of n_i hat -- ntrans as described by idle sense
+    public double idleSenseSum = 0; // sum of idle slots observed in last idleSenseNtrans transmissions
+    public double contentionWindow = 32;
+
 
     // number of packets passing by the receiver
     // increment on start of preamble, contents, jamming
     // decrement on end of preamble, contents, jamming
-    public int ongoingTransmissions;
+    public int ongoingTransmissions = 0;
 
     // a count of the number of packets that have been successfully sent
-    public double successfulPackets;
-    public double preamblesSent;
+    public double successfulPackets = 0;
 
-    public ReceiverState receiver;
-    public TransmitterState transmitter;
+    public ReceiverState receiver = ReceiverState.IDLE;
+    public TransmitterState transmitter = TransmitterState.PREPARING_NEXT_PACKET;
 
     private EthernetSimulator simulator;
 
     public List<ContentsEvent> packetsInProgress;
 
-    public Node(EthernetSimulator simulator,int repeater, int number, int packetSize) {
-        this.number = number;
-        this.name = "Host " + number;
-        this.packetSize = packetSize;
+    public Node(EthernetSimulator simulator, int repeater, int number, int packetSize) {
         this.simulator = simulator;
         this.repeater = repeater;
+        this.number = number;
+        this.packetSize = packetSize;
 
-        backoffWindow = 0;
-
-        receiver = ReceiverState.IDLE;
-        transmitter = TransmitterState.PREPARING_NEXT_PACKET;
+        this.name = "Host " + number;
 
         // start preparing a packet to start this node up
         simulator.add(new PacketReadyEvent(simulator, this, simulator.getTime()));
@@ -141,12 +157,51 @@ public class Node {
     public void transitionToIdle(double currentTime) {
         assert this.ongoingTransmissions == 0;
 
+        // whenever we transition to idle, there is no data passing the receiver. So it is here that we track the end of
+        // a packet for idle sense. The code below is adapted from Figure 6 of Heusse et al.
+        assert this.lastObservedTransmissionEnd == -1;
+        this.lastObservedTransmissionEnd = currentTime;
+        this.idleSenseSum += this.idleSlotsBeforeTransmission;
+        if (this.idleSenseNtrans >= idleSenseMaxtrans) {
+            // compute idle slots estimator
+            double idleSlotsEstimate = idleSenseSum / idleSenseNtrans;
+            idleSenseSum = 0;
+            idleSenseNtrans = 0;
+
+            // additive-increase/multiplicative-decrease of contention window
+            if (idleSlotsEstimate < IDLE_SENSE_TARGET_IDLE_SLOTS) {
+                this.contentionWindow /= IDLE_SENSE_ADDITIVE_INCREASE_CONSTANT;
+            } else {
+                this.contentionWindow = (2 * this.contentionWindow) /
+                        (2 + IDLE_SENSE_MULTIPLICATIVE_DECREASE_CONSTANT * this.contentionWindow);
+            }
+        }
+
+        // schedule idleness
         this.receiver = Node.ReceiverState.WAITING_INTERPACKET;
         this.simulator.add(new ReceiverIdleEvent(this.simulator, this, currentTime));
     }
 
+    /**
+     *
+     * @return random number in [0, CW)
+     */
+    public int getBackoffSlots() {
+        int cw = (int)contentionWindow;
+        assert cw >= 0;
+
+        if (cw > 0) {
+            return simulator.getRandom().nextInt(cw);
+        } else {
+            return 0;
+        }
+    }
+
     public String getName() { return name; }
     public double getPacketSize() { return packetSize; }
+    public double getBitsSent() {
+        return this.successfulPackets * (getPacketSize() + PACKET_OVERHEAD_BITS);
+    }
     public int getNumber() { return number;}
-    public int getRepeater() {return repeater;}
+    public int getRepeater() {return repeater; }
 }

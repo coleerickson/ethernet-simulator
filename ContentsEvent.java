@@ -30,7 +30,14 @@ public class ContentsEvent extends RoutedDataEvent {
             assert source.transmitter == Node.TransmitterState.TRANSMITTING_CONTENTS;
 
             source.packetsInProgress = null;
+
             ++source.successfulPackets;
+
+            // store transmission delay
+            if (source.beginningAttemptTime != -1) {
+                source.totalTransmissionDelay += scheduledTime - source.beginningAttemptTime;
+                source.beginningAttemptTime = -1;
+            }
 
             source.transmitter = Node.TransmitterState.PREPARING_NEXT_PACKET;
             simulator.add(new PacketReadyEvent(simulator, source, super.scheduledTime));
