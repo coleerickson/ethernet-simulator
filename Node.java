@@ -50,6 +50,7 @@ public class Node {
     public double contentionWindow = 32;
 
 
+
     // number of packets passing by the receiver
     // increment on start of preamble, contents, jamming
     // decrement on end of preamble, contents, jamming
@@ -60,6 +61,10 @@ public class Node {
 
     public ReceiverState receiver = ReceiverState.IDLE;
     public TransmitterState transmitter = TransmitterState.PREPARING_NEXT_PACKET;
+
+    // for analyzing average collision duration
+    public double totalCollisionTime = 0;
+    public int numCollisions = 0;
 
     private EthernetSimulator simulator;
 
@@ -138,10 +143,17 @@ public class Node {
                 truncatedEvent.scheduledTime = event.scheduledTime + simulator.getLayout().getPropagationDelay(event.source, event.dest);
                 truncatedEvent.fail();
 
+                // sum of overhead, packet size (subtracting truncated part), and jamming time
+                this.totalCollisionTime += EthernetSimulator.BIT_TIME * (getPacketSize() - (event.scheduledTime - truncatedEvent.scheduledTime) + EthernetSimulator.PACKET_OVERHEAD_BITS + JammingEvent.BIT_TIME_DURATION);
+                this.numCollisions++;
+
                 simulator.add(truncatedEvent);
             }
             packetsInProgress = null;
         } else if (this.transmitter == TransmitterState.TRANSMITTING_PREAMBLE) {
+            this.totalCollisionTime += EthernetSimulator.BIT_TIME * (JammingEvent.BIT_TIME_DURATION + EthernetSimulator.PACKET_OVERHEAD_BITS);
+            this.numCollisions++;
+
             assert packetsInProgress == null;
         }
 
