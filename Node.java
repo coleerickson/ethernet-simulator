@@ -21,8 +21,7 @@ public class Node {
         WAITING_FOR_BACKOFF;
     }
 
-    // An identifier for this node
-    private final String name;
+    // fields to identify the location of the node on the network
     private final int number;
     private final int repeater;
 
@@ -51,7 +50,6 @@ public class Node {
 
     public Node(EthernetSimulator simulator,int repeater, int number, int packetSize) {
         this.number = number;
-        this.name = "Host " + number;
         this.packetSize = packetSize;
         this.simulator = simulator;
         this.repeater = repeater;
@@ -149,7 +147,7 @@ public class Node {
         this.simulator.add(new ReceiverIdleEvent(this.simulator, this, currentTime));
     }
 
-    public String getName() { return name; }
+    public String getName() { return "Host " + number; }
     public double getPacketSize() { return packetSize; }
     public double getBitsSent() {
         return this.successfulPackets * (getPacketSize() + PACKET_OVERHEAD_BITS);

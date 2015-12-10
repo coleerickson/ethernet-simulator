@@ -24,7 +24,7 @@ def plot_utilization():
 	print("plotting utilization")
 	plt.title("Utilization")
 	plt.xlim(0,30)
-	#plt.ylim(7,10)
+	plt.ylim(7,10)
 	plt.xlabel("Number of Hosts")
 	plt.ylabel("Utilization (Mb/s)")
 	plot_data(parse("utilization_data.txt"))
@@ -66,7 +66,7 @@ if len(argv) > 1:
 	else:
 		plot_utilization()	
 
-	plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+	#plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 	plt.show()
 else:
 	#plt.figure(num=None, figsize=(8, 6), dpi=100, facecolor='w', edgecolor='k')

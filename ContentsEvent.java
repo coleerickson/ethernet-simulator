@@ -32,6 +32,7 @@ public class ContentsEvent extends RoutedDataEvent {
             source.packetsInProgress = null;
 
             ++source.successfulPackets;
+            source.backoffWindow = 0;
 
             // store transmission delay
             if (source.beginningAttemptTime != 0) {

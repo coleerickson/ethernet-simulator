@@ -145,7 +145,7 @@ public class EthernetSimulator {
 
 
             if (!event.isCanceled()) {
-                //System.out.println(event);
+                System.out.println(event);
                 event.process();
             }
 

@@ -8,7 +8,7 @@ Triggers eager transmitter state or sending preamble transmitter state.
 public class PacketReadyEvent extends EthernetEvent {
     // TODO determine these constants by analyzing the simulator's performance with only one node on the network
 
-    private static final double DELAY_MEAN = 50, DELAY_STANDARD_DEVIATION = 2;
+    private static final double DELAY_MEAN = 200, DELAY_STANDARD_DEVIATION = 10;
 
     public PacketReadyEvent(EthernetSimulator simulator, Node source, double currentTime) {
         super(simulator, source, currentTime + simulator.getRandom().nextGaussian() * DELAY_STANDARD_DEVIATION + DELAY_MEAN);
