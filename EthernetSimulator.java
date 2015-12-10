@@ -102,10 +102,20 @@ public class EthernetSimulator {
         return averageTransmissionDelay / 1E3; // convert microseconds to milliseconds
     }
 
+    public double computeAverageCollisionDuration() {
+        double totalOfNodeAvgs = 0;
+        for (Node node : nodes) {
+            totalOfNodeAvgs += node.totalCollisionTime / node.numCollisions;
+        }
+        return totalOfNodeAvgs / nodes.size() ;
+    }
+
     public void resetAnalytics() {
         for (Node node : nodes) {
             node.totalTransmissionDelay = 0;
             node.successfulPackets = 0;
+            node.numCollisions = 0;
+            node.totalCollisionTime = 0;
         }
     }
 
@@ -199,6 +209,7 @@ public class EthernetSimulator {
             PrintWriter sdOut = new PrintWriter("standard_deviation_data.txt");
             PrintWriter packetOut = new PrintWriter("packet_data.txt");
             PrintWriter delayOut = new PrintWriter("delay_data.txt");
+            PrintWriter collisionOut = new PrintWriter("collision_data.txt");
 
             List<Thread> threads = new ArrayList<>();
 
@@ -213,6 +224,7 @@ public class EthernetSimulator {
                             sdOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeStandardDeviationUtilization());
                             packetOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computePacketRate());
                             delayOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeAverageTransmissionDelay());
+                            collisionOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeAverageCollisionDuration());
                         }
                     });
                     t.start();
@@ -227,6 +239,7 @@ public class EthernetSimulator {
             sdOut.close();
             packetOut.close();
             delayOut.close();
+            collisionOut.close();
         } catch (IOException x){
             System.err.println(x);
         } catch (InterruptedException e) {
