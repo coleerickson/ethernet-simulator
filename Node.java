@@ -8,7 +8,7 @@ public class Node {
     public static final int PACKET_OVERHEAD_BITS = 20 * 8;
     public static final double SLOT_WAITING_TIME = 512 * EthernetSimulator.BIT_TIME; // waiting time for one slot, in microseconds
     // average collision duration was 92.1 computed from simulated data. with slot time of 51.2, implies gamma = 0.803, implies optimal idle slots is 0.8106
-    public static final double IDLE_SENSE_TARGET_IDLE_SLOTS = 10;
+    public static final double IDLE_SENSE_TARGET_IDLE_SLOTS = 8;
     public static final double IDLE_SENSE_MULTIPLICATIVE_DECREASE_CONSTANT = 0.001; // epsilon from paper
     public static final double IDLE_SENSE_ADDITIVE_INCREASE_CONSTANT = 1 / 1.2; // alpha from paper
 
@@ -174,19 +174,21 @@ public class Node {
         assert this.lastObservedTransmissionEnd == -1;
         this.lastObservedTransmissionEnd = currentTime;
         this.idleSenseSum += this.idleSlotsBeforeTransmission;
-        ++idleSenseNtrans;
+        this.idleSlotsBeforeTransmission = 0;
         if (this.idleSenseNtrans >= idleSenseMaxtrans) {
             // compute idle slots estimator
             double idleSlotsEstimate = idleSenseSum / idleSenseNtrans;
+
+
             idleSenseSum = 0;
             idleSenseNtrans = 0;
 
-            // additive-increase/multiplicative-decrease of contention window
-            if (idleSlotsEstimate < IDLE_SENSE_TARGET_IDLE_SLOTS) {
-                this.contentionWindow /= IDLE_SENSE_ADDITIVE_INCREASE_CONSTANT;
-            } else {
-                this.contentionWindow = (2 * this.contentionWindow) /
-                        (2 + IDLE_SENSE_MULTIPLICATIVE_DECREASE_CONSTANT * this.contentionWindow);
+
+            // additive-increase/multiplicative-decrease
+            if (idleSlotsEstimate < IDLE_SENSE_TARGET_IDLE_SLOTS) { // needs to be more idle, so contention window must increase
+                this.contentionWindow += 1;
+            } else { // needs to be less idle, so contention window must decrease
+                this.contentionWindow *= 0.99;
             }
         }
 
@@ -201,14 +203,18 @@ public class Node {
      */
     public int getBackoffSlots() {
         int cw = (int)contentionWindow;
-        assert cw >= 0;
 
-        //System.out.println(getName() + " (" + simulator.getNodes().size() + ") " + packetSize / 8 + " @ " + simulator.getTime() + ": " + cw);
+//        if (cw < 7) {
+//            cw = 7;
+//            contentionWindow = 7;
+//        }
 
-        if (cw > 0) {
-            return simulator.getRandom().nextInt(cw);
-        } else {
+        //System.out.println(cw);
+
+        if (cw <= 0) {
             return 0;
+        } else {
+            return simulator.getRandom().nextInt(cw);
         }
     }
 

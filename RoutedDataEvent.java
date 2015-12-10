@@ -30,7 +30,8 @@ public abstract class RoutedDataEvent extends EthernetEvent {
 
             // whenever we see the beginning of data transfer, we end our tracking of idle slots
             if (dest.lastObservedTransmissionEnd != -1) {
-                dest.idleSlotsBeforeTransmission += (dest.lastObservedTransmissionEnd - scheduledTime) / Node.SLOT_WAITING_TIME;
+                dest.idleSlotsBeforeTransmission += (scheduledTime - dest.lastObservedTransmissionEnd) / (Node.SLOT_WAITING_TIME * EthernetSimulator.BIT_TIME);
+                dest.idleSenseNtrans++;
                 dest.lastObservedTransmissionEnd = -1;
             }
 

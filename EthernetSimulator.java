@@ -190,17 +190,17 @@ public class EthernetSimulator {
     public static void fullTest() {
         // we run for 15 seconds and collect data after 5 seconds to match Boggs et al
         double duration = 15E6;
-        int maxHosts = 51;
+        int maxHosts = 30;
         List<Integer> packetSizes = new ArrayList<>(Arrays.asList(
                  64,
                 128,
-                //256,
-                //512,
-                //768,
-                //1024,
+                256,
+                512,
+                768,
+                1024,
                 1536,
-                //2048,
-                 //3072,
+                2048,
+                 3072,
                 4000
         ));
 
@@ -214,7 +214,7 @@ public class EthernetSimulator {
             List<Thread> threads = new ArrayList<>();
 
             for (int packetSize : packetSizes) {
-                for (int numHosts = 1; numHosts <= maxHosts; numHosts += 5) {
+                for (int numHosts = 1; numHosts <= maxHosts; numHosts += 1) {
                     final int threadNumHosts = numHosts;
                     Thread t = new Thread(new Runnable() {
                         public void run() {
@@ -225,9 +225,9 @@ public class EthernetSimulator {
                             packetOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computePacketRate());
                             delayOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeAverageTransmissionDelay());
                             collisionOut.println(threadNumHosts + "\t" + packetSize + "\t" + simulator.computeAverageCollisionDuration());
-                            for (Node node : simulator.getNodes()) {
-                                System.out.println(threadNumHosts + "\t" + packetSize + "\t" + node.contentionWindow);
-                            }
+//                            for (Node node : simulator.getNodes()) {
+//                                System.out.println(threadNumHosts + "\t" + packetSize + "\t" + node.contentionWindow);
+//                            }
                         }
                     });
                     t.start();
